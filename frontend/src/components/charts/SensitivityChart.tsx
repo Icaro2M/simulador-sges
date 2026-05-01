@@ -39,39 +39,51 @@ export function SensitivityChart({
   metric = "lcos",
 }: Props) {
   return (
-    <section className="chart-card">
-      <div className="chart-card-header">
-        <h3>{metricLabels[metric]} em função do parâmetro</h3>
-        <p>Parâmetro analisado: {parameter}</p>
+    <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mb-5">
+        <h3 className="text-base font-semibold text-slate-950">
+          {metricLabels[metric]} em função do parâmetro
+        </h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Parâmetro analisado: {parameter}
+        </p>
       </div>
 
-      <ResponsiveContainer width="100%" height={320}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
+      <div className="h-80 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data} margin={{ left: 8, right: 12, top: 8, bottom: 8 }}>
+            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
 
-          <XAxis
-            dataKey="value"
-            tickFormatter={(value) => formatNumber(value, 0)}
-          />
+            <XAxis
+              dataKey="value"
+              tick={{ fill: "#475569", fontSize: 12 }}
+              tickFormatter={(value) => formatNumber(value, 0)}
+              tickLine={false}
+            />
 
-          <YAxis tickFormatter={(value) => formatNumber(value, 0)} />
+            <YAxis
+              tick={{ fill: "#475569", fontSize: 12 }}
+              tickFormatter={(value) => formatNumber(value, 0)}
+              tickLine={false}
+            />
 
-          <Tooltip
-            formatter={(value) =>
-              formatMetricValue(Number(value), metric)
-            }
-            labelFormatter={(label) => `${parameter}: ${formatNumber(label)}`}
-          />
+            <Tooltip
+              formatter={(value) => formatMetricValue(Number(value), metric)}
+              labelFormatter={(label) => `${parameter}: ${formatNumber(label)}`}
+            />
 
-          <Line
-            type="monotone"
-            dataKey={metric}
-            strokeWidth={3}
-            dot
-            name={metricLabels[metric]}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+            <Line
+              type="monotone"
+              dataKey={metric}
+              stroke="#2563eb"
+              strokeWidth={3}
+              dot={{ r: 4, fill: "#2563eb" }}
+              activeDot={{ r: 6 }}
+              name={metricLabels[metric]}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     </section>
   );
 }

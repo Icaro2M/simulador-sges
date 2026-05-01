@@ -1,15 +1,19 @@
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
 } from "recharts";
 
 import type { ComparisonResultItem } from "../../types/analysis";
-import { formatCurrency, formatNumber, formatPercent } from "../../utils/formatters";
+import {
+  formatCurrency,
+  formatNumber,
+  formatPercent,
+} from "../../utils/formatters";
 
 export type ComparisonMetric =
   | "lcos_per_mwh"
@@ -51,25 +55,42 @@ export function ComparisonChart({
   }));
 
   return (
-    <section className="chart-card">
-      <div className="chart-card-header">
-        <h3>Comparação de {metricLabels[metric]}</h3>
-        <p>Métrica comparada entre os cenários simulados.</p>
+    <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mb-5">
+        <h3 className="text-base font-semibold text-slate-950">
+          Comparação de {metricLabels[metric]}
+        </h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Métrica comparada entre os cenários simulados.
+        </p>
       </div>
 
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis tickFormatter={(value) => formatNumber(Number(value), 0)} />
-          <Tooltip
-            formatter={(value) =>
-              formatMetricValue(Number(value), metric)
-            }
-          />
-          <Bar dataKey="value" name={metricLabels[metric]} />
-        </BarChart>
-      </ResponsiveContainer>
+      <div className="h-80 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData} margin={{ left: 8, right: 8 }}>
+            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <XAxis
+              dataKey="name"
+              tick={{ fill: "#475569", fontSize: 12 }}
+              tickLine={false}
+            />
+            <YAxis
+              tick={{ fill: "#475569", fontSize: 12 }}
+              tickFormatter={(value) => formatNumber(Number(value), 0)}
+              tickLine={false}
+            />
+            <Tooltip
+              formatter={(value) => formatMetricValue(Number(value), metric)}
+            />
+            <Bar
+              dataKey="value"
+              fill="#2563eb"
+              name={metricLabels[metric]}
+              radius={[6, 6, 0, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </section>
   );
 }

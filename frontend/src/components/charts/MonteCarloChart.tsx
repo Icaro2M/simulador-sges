@@ -8,7 +8,6 @@ import {
   YAxis,
 } from "recharts";
 
-import { SectionCard } from "../ui/SectionCard";
 import type { MonteCarloResultItem } from "../../types/analysis";
 
 type MonteCarloMetric =
@@ -46,9 +45,14 @@ export function MonteCarloChart({
 
   if (values.length === 0) {
     return (
-      <SectionCard title="Distribuição de Monte Carlo">
-        <p>Nenhum dado numérico encontrado para a métrica {metricLabels[metric]}.</p>
-      </SectionCard>
+      <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 className="text-base font-semibold text-slate-950">
+          Distribuição de Monte Carlo
+        </h3>
+        <p className="mt-2 text-sm text-slate-500">
+          Nenhum dado numérico encontrado para a métrica {metricLabels[metric]}.
+        </p>
+      </section>
     );
   }
 
@@ -72,18 +76,40 @@ export function MonteCarloChart({
   });
 
   return (
-    <SectionCard title={`Distribuição de ${metricLabels[metric]}`}>
-      <div style={{ width: "100%", height: 320 }}>
-        <ResponsiveContainer>
-          <BarChart data={histogram}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="range" />
-            <YAxis allowDecimals={false} />
+    <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mb-5">
+        <h3 className="text-base font-semibold text-slate-950">
+          Distribuição de {metricLabels[metric]}
+        </h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Frequência dos valores amostrados na simulação de Monte Carlo.
+        </p>
+      </div>
+
+      <div className="h-80 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={histogram} margin={{ left: 8, right: 12, top: 8, bottom: 8 }}>
+            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+            <XAxis
+              dataKey="range"
+              tick={{ fill: "#475569", fontSize: 11 }}
+              tickLine={false}
+            />
+            <YAxis
+              allowDecimals={false}
+              tick={{ fill: "#475569", fontSize: 12 }}
+              tickLine={false}
+            />
             <Tooltip />
-            <Bar dataKey="count" name="Frequência" />
+            <Bar
+              dataKey="count"
+              fill="#2563eb"
+              name="Frequência"
+              radius={[6, 6, 0, 0]}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </SectionCard>
+    </section>
   );
 }

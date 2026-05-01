@@ -15,24 +15,38 @@ interface DashboardModuleChartProps {
   }[];
 }
 
+const accent = "#0f766e";
+
 export function DashboardModuleChart({ data }: DashboardModuleChartProps) {
   return (
-    <div className="dashboard-chart">
-      <ResponsiveContainer width="100%" height={260}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
+    <div className="h-72 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} margin={{ left: 8, right: 12, top: 8, bottom: 8 }}>
+          <CartesianGrid stroke="#e2e8f0" strokeDasharray="4 6" vertical={false} />
 
-          <XAxis dataKey="module" />
-          <YAxis allowDecimals={false} />
-
-          <Tooltip
-            formatter={(value) => [
-              `${value} execução(ões)`,
-              "Quantidade",
-            ]}
+          <XAxis
+            dataKey="module"
+            tick={{ fill: "#475569", fontSize: 12 }}
+            axisLine={{ stroke: "#cbd5e1" }}
+            tickLine={false}
+          />
+          <YAxis
+            allowDecimals={false}
+            tick={{ fill: "#475569", fontSize: 12 }}
+            axisLine={false}
+            tickLine={false}
           />
 
-          <Bar dataKey="count" radius={[8, 8, 0, 0]} />
+          <Tooltip
+            contentStyle={{
+              border: "1px solid #ccfbf1",
+              borderRadius: 8,
+              boxShadow: "0 10px 25px rgba(15, 118, 110, 0.10)",
+            }}
+            formatter={(value) => [`${value} execução(ões)`, "Quantidade"]}
+          />
+
+          <Bar dataKey="count" fill={accent} radius={[6, 6, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

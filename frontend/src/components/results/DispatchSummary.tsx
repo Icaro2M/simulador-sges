@@ -12,6 +12,17 @@ function formatNumber(value: number, digits = 2) {
   });
 }
 
+function SummaryCard({ title, value }: { title: string; value: string }) {
+  return (
+    <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <span className="block text-sm font-medium text-slate-500">{title}</span>
+      <strong className="mt-2 block text-2xl font-semibold text-slate-950">
+        {value}
+      </strong>
+    </article>
+  );
+}
+
 export function DispatchSummary({ data }: Props) {
   const normalizedData = normalizeDispatchResults(data);
 
@@ -36,26 +47,23 @@ export function DispatchSummary({ data }: Props) {
   );
 
   return (
-    <section className="metrics-grid">
-      <article className="metric-card">
-        <span>Energia carregada</span>
-        <strong>{formatNumber(totalChargedEnergy)} kWh</strong>
-      </article>
+    <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <SummaryCard
+        title="Energia carregada"
+        value={`${formatNumber(totalChargedEnergy)} kWh`}
+      />
 
-      <article className="metric-card">
-        <span>Energia descarregada</span>
-        <strong>{formatNumber(totalDischargedEnergy)} kWh</strong>
-      </article>
+      <SummaryCard
+        title="Energia descarregada"
+        value={`${formatNumber(totalDischargedEnergy)} kWh`}
+      />
 
-      <article className="metric-card">
-        <span>Maior SOC</span>
-        <strong>{formatNumber(maxSoc)} kWh</strong>
-      </article>
+      <SummaryCard title="Maior SOC" value={`${formatNumber(maxSoc)} kWh`} />
 
-      <article className="metric-card">
-        <span>Fluxo líquido total</span>
-        <strong>{formatNumber(totalNetCashflow)}</strong>
-      </article>
+      <SummaryCard
+        title="Fluxo líquido total"
+        value={formatNumber(totalNetCashflow)}
+      />
     </section>
   );
 }

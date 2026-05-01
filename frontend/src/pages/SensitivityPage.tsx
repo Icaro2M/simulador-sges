@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -26,6 +26,7 @@ const defaultValues: SensitivityRequest = {
 };
 
 export function SensitivityPage() {
+  const resultRef = useRef<HTMLDivElement | null>(null);
   const { result, isLoading, errorMessage, runSensitivity } = useSensitivity();
 
   const [metric, setMetric] = useState<SensitivityMetric>("lcos");
@@ -37,6 +38,15 @@ export function SensitivityPage() {
   } = useForm<SensitivityRequest>({
     defaultValues,
   });
+
+  useEffect(() => {
+    if (result) {
+      resultRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [result]);
 
   async function handleRunSensitivity(request: SensitivityRequest) {
     const response = await runSensitivity(request);
@@ -93,53 +103,74 @@ export function SensitivityPage() {
       title="Análise de sensibilidade"
       subtitle="Avalie como a variação de um parâmetro altera os resultados técnico-econômicos."
     >
-      <form
-        onSubmit={handleSubmit(handleRunSensitivity)}
-        className="simulation-form"
-      >
-        <div className="form-grid">
-          <label>
-            Métrica do gráfico
-            <select
-              value={metric}
-              onChange={(event) =>
-                setMetric(event.target.value as SensitivityMetric)
-              }
+      <div className="space-y-8">
+        <form
+          onSubmit={handleSubmit(handleRunSensitivity)}
+          className="space-y-6"
+        >
+          <SensitivityForm register={register} errors={errors} />
+
+          <div className="flex justify-end border-t border-slate-200 pt-6">
+            <button
+              className="inline-flex h-11 items-center justify-center rounded-md bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-400"
+              type="submit"
+              disabled={isLoading}
             >
-              <option value="lcos">LCOS</option>
-              <option value="capex">CAPEX</option>
-              <option value="annual_energy_mwh">Energia anual</option>
-            </select>
-          </label>
-        </div>
+              {isLoading ? "Executando..." : "Executar sensibilidade"}
+            </button>
+          </div>
+        </form>
 
-        <SensitivityForm register={register} errors={errors} />
+        {errorMessage && (
+          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            {errorMessage}
+          </div>
+        )}
 
-        <div className="form-actions">
-          <button className="primary-button" type="submit" disabled={isLoading}>
-            {isLoading ? "Executando..." : "Executar sensibilidade"}
-          </button>
-        </div>
-      </form>
+        {result && (
+          <div className="space-y-6 scroll-mt-6" ref={resultRef}>
+            <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="grid gap-4 md:grid-cols-[minmax(240px,360px)_1fr] md:items-end">
+                <label className="grid gap-2 text-sm font-semibold text-slate-700">
+                  Métrica do gráfico
+                  <select
+                    className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                    value={metric}
+                    onChange={(event) =>
+                      setMetric(event.target.value as SensitivityMetric)
+                    }
+                  >
+                    <option value="lcos">LCOS</option>
+                    <option value="capex">CAPEX</option>
+                    <option value="annual_energy_mwh">Energia anual</option>
+                  </select>
+                </label>
 
-      {errorMessage && <div className="error-alert">{errorMessage}</div>}
+                <p className="text-sm text-slate-500">
+                  Escolha a métrica exibida no gráfico e na tabela.
+                </p>
+              </div>
+            </section>
 
-      {result && (
-        <>
-          <SensitivityChart
-            data={result.results}
-            parameter={result.parameter}
-            metric={metric}
-          />
+            <SensitivityChart
+              data={result.results}
+              parameter={result.parameter}
+              metric={metric}
+            />
 
-          <ResultTable title="Resultados da sensibilidade" rows={rows} />
+            <ResultTable title="Resultados da sensibilidade" rows={rows} />
 
-          <details className="raw-result">
-            <summary>Ver resposta completa da API</summary>
-            <pre>{JSON.stringify(result, null, 2)}</pre>
-          </details>
-        </>
-      )}
+            <details className="rounded-lg border border-slate-200 bg-slate-950 p-4 text-sm text-white">
+              <summary className="cursor-pointer font-semibold">
+                Ver resposta completa da API
+              </summary>
+              <pre className="mt-4 overflow-x-auto text-xs leading-6 text-slate-100">
+                {JSON.stringify(result, null, 2)}
+              </pre>
+            </details>
+          </div>
+        )}
+      </div>
     </PageContainer>
   );
 }

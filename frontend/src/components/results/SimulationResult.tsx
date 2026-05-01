@@ -4,13 +4,33 @@ import {
   formatNumber,
   formatPercent,
 } from "../../utils/formatters";
-import { MetricCard } from "./MetricCard";
 import { ResultTable } from "./ResultTable";
 import { SimulationEnergyChart } from "../charts/SimulationEnergyChart";
 import { SimulationCostChart } from "../charts/SimulationCostChart";
 
 interface SimulationResultProps {
   response: SimulationResponse;
+}
+
+function SummaryMetric({
+  title,
+  value,
+  unit,
+}: {
+  title: string;
+  value: string | number;
+  unit?: string;
+}) {
+  return (
+    <article className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+      <span className="block text-sm font-medium text-slate-500">{title}</span>
+
+      <strong className="mt-2 block text-2xl font-semibold text-slate-950">
+        {value}
+        {unit && <small className="ml-1 text-sm font-medium text-slate-500">{unit}</small>}
+      </strong>
+    </article>
+  );
 }
 
 export function SimulationResult({ response }: SimulationResultProps) {
@@ -84,54 +104,61 @@ export function SimulationResult({ response }: SimulationResultProps) {
   ];
 
   return (
-    <section className="simulation-result">
-      <div className="result-header">
-        <div>
-          <h2>Resultado da simulação</h2>
-          <p>Cenário: {response.scenario_name}</p>
-        </div>
+    <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-slate-950">
+          Resultado da simulação
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Cenário: {response.scenario_name}
+        </p>
       </div>
 
-      <div className="metrics-grid">
-        <MetricCard
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <SummaryMetric
           title="Energia entregue"
           value={formatNumber(technology.delivered_energy_kwh)}
           unit="kWh"
         />
 
-        <MetricCard
+        <SummaryMetric
           title="Eficiência round-trip"
           value={formatPercent(technology.round_trip_efficiency)}
         />
 
-        <MetricCard
+        <SummaryMetric
           title="CAPEX inicial"
           value={formatCurrency(result.initial_capex)}
         />
 
-        <MetricCard
+        <SummaryMetric
           title="LCOS"
           value={formatCurrency(lcos.lcos_per_mwh)}
           unit="/MWh"
         />
-
       </div>
 
-      <SimulationEnergyChart data={technology} />
+      <div className="mt-8 grid gap-6 xl:grid-cols-2">
+        <SimulationEnergyChart data={technology} />
 
-      <SimulationCostChart
-        capex={result.initial_capex}
-        opex={result.annual_opex}
-      />
+        <SimulationCostChart
+          capex={result.initial_capex}
+          opex={result.annual_opex}
+        />
+      </div>
 
-      <div className="result-tables-grid">
+      <div className="mt-6 grid gap-6 xl:grid-cols-2">
         <ResultTable title="Resultados técnicos" rows={technicalRows} />
         <ResultTable title="Resultados econômicos" rows={economicRows} />
       </div>
 
-      <details className="raw-result">
-        <summary>Ver resposta completa da API</summary>
-        <pre>{JSON.stringify(response, null, 2)}</pre>
+      <details className="mt-6 rounded-lg border border-slate-200 bg-slate-950 p-4 text-sm text-white">
+        <summary className="cursor-pointer font-semibold">
+          Ver resposta completa da API
+        </summary>
+        <pre className="mt-4 overflow-x-auto text-xs leading-6 text-slate-100">
+          {JSON.stringify(response, null, 2)}
+        </pre>
       </details>
     </section>
   );

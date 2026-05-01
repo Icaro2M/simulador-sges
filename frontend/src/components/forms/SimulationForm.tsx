@@ -56,14 +56,20 @@ export function SimulationForm({
   });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="simulation-form">
-      <ScenarioForm register={register} errors={errors} />
-      <TechnologyForm register={register} errors={errors} />
-      <LossesForm register={register} errors={errors} />
-      <EconomicsForm register={register} errors={errors} />
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="grid gap-6">
+        <ScenarioForm register={register} errors={errors} />
+        <TechnologyForm register={register} errors={errors} />
+        <LossesForm register={register} errors={errors} />
+        <EconomicsForm register={register} errors={errors} />
+      </div>
 
-      <div className="form-actions">
-        <button className="primary-button" type="submit" disabled={isLoading}>
+      <div className="flex justify-end pt-1">
+        <button
+          className="inline-flex h-11 items-center justify-center rounded-md bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-400"
+          type="submit"
+          disabled={isLoading}
+        >
           {isLoading ? "Executando simulação..." : "Executar simulação"}
         </button>
       </div>
