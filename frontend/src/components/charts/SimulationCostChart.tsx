@@ -1,4 +1,4 @@
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import { formatCurrency } from "../../utils/formatters";
 
@@ -8,6 +8,15 @@ interface Props {
 }
 
 const colors = ["#2563eb", "#16a34a"];
+
+function formatCostLabel(value: number) {
+  return value.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
 
 export function SimulationCostChart({ capex, opex }: Props) {
   const data = [
@@ -33,8 +42,8 @@ export function SimulationCostChart({ capex, opex }: Props) {
               data={data}
               dataKey="value"
               nameKey="name"
-              outerRadius={96}
-              label
+              outerRadius={90}
+              label={({ value }) => formatCostLabel(Number(value))}
             >
               {data.map((entry, index) => (
                 <Cell key={entry.name} fill={colors[index]} />
@@ -42,6 +51,14 @@ export function SimulationCostChart({ capex, opex }: Props) {
             </Pie>
 
             <Tooltip formatter={(value) => formatCurrency(value)} />
+            <Legend
+              iconType="circle"
+              formatter={(value) => (
+                <span className="text-sm font-medium text-slate-700">
+                  {value}
+                </span>
+              )}
+            />
           </PieChart>
         </ResponsiveContainer>
       </div>
