@@ -36,21 +36,18 @@ export function DashboardEvolutionChart({
   metric,
 }: DashboardEvolutionChartProps) {
   return (
-    <div className="dashboard-chart">
-      <ResponsiveContainer width="100%" height={280}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
+    <div className="h-80 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ left: 8, right: 12, top: 8, bottom: 8 }}>
+          <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
 
           <XAxis
             dataKey="execution"
-            label={{
-              value: "Execução",
-              position: "insideBottom",
-              offset: -5,
-            }}
+            tick={{ fill: "#475569", fontSize: 12 }}
+            tickLine={false}
           />
 
-          <YAxis />
+          <YAxis tick={{ fill: "#475569", fontSize: 12 }} tickLine={false} />
 
           <Tooltip
             formatter={(value) => [
@@ -65,8 +62,9 @@ export function DashboardEvolutionChart({
           <Line
             type="monotone"
             dataKey={metric}
+            stroke="#2563eb"
             strokeWidth={3}
-            dot={{ r: 4 }}
+            dot={{ r: 4, fill: "#2563eb" }}
             activeDot={{ r: 6 }}
             connectNulls
           />
