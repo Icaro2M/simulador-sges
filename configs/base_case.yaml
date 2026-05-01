@@ -1,0 +1,26 @@
+name: base_case
+
+technology:
+  type: tower
+  mass_kg: 1000000
+  height_m: 150
+  nominal_power_kw: 1000
+  motor_efficiency: 0.92
+  generator_efficiency: 0.92
+  mechanical_efficiency: 0.90
+  auxiliary_efficiency: 0.99
+
+losses:
+  cycle_loss_fraction: 0.02
+  fixed_cycle_loss_kwh: 0.75
+  standby_loss_kwh_per_hour: 0.02
+
+economics:
+  cost_per_kw: 1000
+  cost_per_kwh: 60
+  fixed_capex: 120000
+  fixed_annual_opex: 25000
+  variable_opex_per_mwh: 2.5
+  project_lifetime_years: 30
+  discount_rate: 0.08
+  cycles_per_year: 300

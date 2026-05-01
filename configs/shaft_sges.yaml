@@ -1,0 +1,26 @@
+name: shaft_reference_case
+
+technology:
+  type: shaft
+  mass_kg: 2000000
+  height_m: 300
+  nominal_power_kw: 2000
+  motor_efficiency: 0.93
+  generator_efficiency: 0.93
+  mechanical_efficiency: 0.92
+  auxiliary_efficiency: 0.98
+
+losses:
+  cycle_loss_fraction: 0.015
+  fixed_cycle_loss_kwh: 1.0
+  standby_loss_kwh_per_hour: 0.03
+
+economics:
+  cost_per_kw: 900
+  cost_per_kwh: 45
+  fixed_capex: 300000
+  fixed_annual_opex: 45000
+  variable_opex_per_mwh: 2.5
+  project_lifetime_years: 35
+  discount_rate: 0.08
+  cycles_per_year: 320

@@ -1,0 +1,2 @@
+[console_scripts]
+sges = sges.cli.main:app

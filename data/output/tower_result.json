@@ -1,0 +1,20 @@
+{
+    "scenario_name": "tower_reference_case",
+    "technology": {
+        "name": "Tower SGES",
+        "stored_energy_kwh": 136.20347222222222,
+        "delivered_energy_kwh": 103.75435700000001,
+        "round_trip_efficiency": 0.7617600000000001,
+        "nominal_power_kw": 500,
+        "charge_time_h": 0.2724069444444444,
+        "discharge_time_h": 0.20750871400000004
+    },
+    "economics": {
+        "initial_capex": 660896.2777777778,
+        "annual_opex": 15093.3789213,
+        "annual_discharged_energy_mwh": 31.126307100000005,
+        "lcos_per_mwh": 2370.9558212095717,
+        "discounted_cost": 830814.2675895004,
+        "discounted_energy_mwh": 350.4132216034504
+    }
+}
