@@ -108,30 +108,6 @@ export function SensitivityPage() {
           onSubmit={handleSubmit(handleRunSensitivity)}
           className="space-y-6"
         >
-          <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="grid gap-4 md:grid-cols-[minmax(240px,360px)_1fr] md:items-end">
-              <label className="grid gap-2 text-sm font-semibold text-slate-700">
-                Métrica do gráfico
-                <select
-                  className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
-                  value={metric}
-                  onChange={(event) =>
-                    setMetric(event.target.value as SensitivityMetric)
-                  }
-                >
-                  <option value="lcos">LCOS</option>
-                  <option value="capex">CAPEX</option>
-                  <option value="annual_energy_mwh">Energia anual</option>
-                </select>
-              </label>
-
-              <p className="text-sm text-slate-500">
-                Esta métrica será usada no gráfico e na tabela de resultados
-                após a execução da análise.
-              </p>
-            </div>
-          </section>
-
           <SensitivityForm register={register} errors={errors} />
 
           <div className="flex justify-end border-t border-slate-200 pt-6">
@@ -153,6 +129,29 @@ export function SensitivityPage() {
 
         {result && (
           <div className="space-y-6 scroll-mt-6" ref={resultRef}>
+            <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="grid gap-4 md:grid-cols-[minmax(240px,360px)_1fr] md:items-end">
+                <label className="grid gap-2 text-sm font-semibold text-slate-700">
+                  Métrica do gráfico
+                  <select
+                    className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                    value={metric}
+                    onChange={(event) =>
+                      setMetric(event.target.value as SensitivityMetric)
+                    }
+                  >
+                    <option value="lcos">LCOS</option>
+                    <option value="capex">CAPEX</option>
+                    <option value="annual_energy_mwh">Energia anual</option>
+                  </select>
+                </label>
+
+                <p className="text-sm text-slate-500">
+                  Escolha a métrica exibida no gráfico e na tabela.
+                </p>
+              </div>
+            </section>
+
             <SensitivityChart
               data={result.results}
               parameter={result.parameter}

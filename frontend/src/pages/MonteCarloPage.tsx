@@ -164,7 +164,7 @@ export function MonteCarloPage() {
     >
       <div className="space-y-8">
         <Panel title="Configuração da análise">
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <Field label="Iterações">
               <input
                 className={controlClass}
@@ -186,23 +186,6 @@ export function MonteCarloPage() {
                   )
                 }
               />
-            </Field>
-
-            <Field label="Métrica do histograma">
-              <select
-                className={controlClass}
-                value={metric}
-                onChange={(event) =>
-                  setMetric(event.target.value as MonteCarloMetric)
-                }
-              >
-                <option value="lcos">LCOS</option>
-                <option value="capex">CAPEX</option>
-                <option value="annual_energy_mwh">Energia anual</option>
-                <option value="round_trip_efficiency">
-                  Eficiência round-trip
-                </option>
-              </select>
             </Field>
           </div>
         </Panel>
@@ -377,6 +360,31 @@ export function MonteCarloPage() {
                     Exportar JSON
                   </button>
                 </div>
+              </div>
+            </section>
+
+            <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="grid gap-4 md:grid-cols-[minmax(240px,360px)_1fr] md:items-end">
+                <Field label="Métrica do histograma">
+                  <select
+                    className={controlClass}
+                    value={metric}
+                    onChange={(event) =>
+                      setMetric(event.target.value as MonteCarloMetric)
+                    }
+                  >
+                    <option value="lcos">LCOS</option>
+                    <option value="capex">CAPEX</option>
+                    <option value="annual_energy_mwh">Energia anual</option>
+                    <option value="round_trip_efficiency">
+                      Eficiência round-trip
+                    </option>
+                  </select>
+                </Field>
+
+                <p className="text-sm text-slate-500">
+                  Escolha a métrica exibida no resumo, histograma e tabela.
+                </p>
               </div>
             </section>
 

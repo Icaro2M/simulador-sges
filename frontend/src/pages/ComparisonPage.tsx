@@ -111,33 +111,6 @@ export function ComparisonPage() {
     >
       <div className="space-y-8">
         <form onSubmit={handleSubmit(handleComparison)} className="space-y-6">
-          <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="grid gap-4 md:grid-cols-[minmax(240px,360px)_1fr] md:items-end">
-              <label className="grid gap-2 text-sm font-semibold text-slate-700">
-                Métrica do gráfico
-                <select
-                  className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
-                  value={metric}
-                  onChange={(event) =>
-                    setMetric(event.target.value as ComparisonMetric)
-                  }
-                >
-                  <option value="lcos_per_mwh">LCOS</option>
-                  <option value="delivered_energy_kwh">Energia entregue</option>
-                  <option value="round_trip_efficiency">
-                    Eficiência round-trip
-                  </option>
-                  <option value="initial_capex">CAPEX inicial</option>
-                </select>
-              </label>
-
-              <p className="text-sm text-slate-500">
-                Escolha o indicador que será usado no gráfico comparativo após a
-                execução.
-              </p>
-            </div>
-          </section>
-
           {errors.scenarios?.root?.message && (
             <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
               {errors.scenarios.root.message}
@@ -185,6 +158,32 @@ export function ComparisonPage() {
 
         {results.length > 0 && (
           <div className="space-y-6 scroll-mt-6" ref={resultsRef}>
+            <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="grid gap-4 md:grid-cols-[minmax(240px,360px)_1fr] md:items-end">
+                <label className="grid gap-2 text-sm font-semibold text-slate-700">
+                  Métrica do gráfico
+                  <select
+                    className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                    value={metric}
+                    onChange={(event) =>
+                      setMetric(event.target.value as ComparisonMetric)
+                    }
+                  >
+                    <option value="lcos_per_mwh">LCOS</option>
+                    <option value="delivered_energy_kwh">Energia entregue</option>
+                    <option value="round_trip_efficiency">
+                      Eficiência round-trip
+                    </option>
+                    <option value="initial_capex">CAPEX inicial</option>
+                  </select>
+                </label>
+
+                <p className="text-sm text-slate-500">
+                  Escolha o indicador exibido no gráfico comparativo.
+                </p>
+              </div>
+            </section>
+
             <ComparisonChart data={results} metric={metric} />
             <ComparisonTable data={results} />
           </div>
