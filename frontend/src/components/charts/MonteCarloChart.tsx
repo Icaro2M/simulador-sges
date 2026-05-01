@@ -27,6 +27,10 @@ interface Props {
   bins?: number;
 }
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
 const metricLabels: Record<MonteCarloMetric, string> = {
   lcos: "LCOS",
   capex: "CAPEX",
@@ -41,7 +45,7 @@ export function MonteCarloChart({
 }: Props) {
   const values = results
     .map((item) => item[metric])
-    .filter((value) => Number.isFinite(value));
+    .filter(isFiniteNumber);
 
   if (values.length === 0) {
     return (

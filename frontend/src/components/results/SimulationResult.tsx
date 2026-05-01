@@ -54,6 +54,11 @@ export function SimulationResult({ response }: SimulationResultProps) {
       unit: "kWh",
     },
     {
+      label: "Energia efetiva entregue",
+      value: formatNumber(result.effective_delivered_energy_kwh),
+      unit: "kWh",
+    },
+    {
       label: "Eficiência round-trip",
       value: formatPercent(technology.round_trip_efficiency),
     },
@@ -72,6 +77,16 @@ export function SimulationResult({ response }: SimulationResultProps) {
       value: formatNumber(technology.discharge_time_h, 4),
       unit: "h",
     },
+    {
+      label: "Tempo standby por ciclo",
+      value: formatNumber(result.standby_hours_per_cycle, 4),
+      unit: "h",
+    },
+    {
+      label: "Perda standby por ciclo",
+      value: formatNumber(result.standby_loss_per_cycle_kwh),
+      unit: "kWh",
+    },
   ];
 
   const economicRows = [
@@ -89,16 +104,21 @@ export function SimulationResult({ response }: SimulationResultProps) {
       unit: "MWh",
     },
     {
+      label: "Perda standby anual",
+      value: formatNumber(result.annual_standby_loss_kwh),
+      unit: "kWh",
+    },
+    {
       label: "LCOS",
-      value: formatCurrency(lcos.lcos_per_mwh),
+      value: lcos ? formatCurrency(lcos.lcos_per_mwh) : "Indefinido",
     },
     {
       label: "Custo descontado",
-      value: formatCurrency(lcos.discounted_cost),
+      value: lcos ? formatCurrency(lcos.discounted_cost) : "-",
     },
     {
       label: "Energia descontada",
-      value: formatNumber(lcos.discounted_energy_mwh),
+      value: lcos ? formatNumber(lcos.discounted_energy_mwh) : "-",
       unit: "MWh",
     },
   ];
@@ -116,8 +136,8 @@ export function SimulationResult({ response }: SimulationResultProps) {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <SummaryMetric
-          title="Energia entregue"
-          value={formatNumber(technology.delivered_energy_kwh)}
+          title="Energia efetiva"
+          value={formatNumber(result.effective_delivered_energy_kwh)}
           unit="kWh"
         />
 
@@ -133,13 +153,19 @@ export function SimulationResult({ response }: SimulationResultProps) {
 
         <SummaryMetric
           title="LCOS"
-          value={formatCurrency(lcos.lcos_per_mwh)}
+          value={lcos ? formatCurrency(lcos.lcos_per_mwh) : "Indefinido"}
           unit="/MWh"
         />
       </div>
 
+      {result.warnings.length > 0 && (
+        <div className="mt-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+          {result.warnings.join(" ")}
+        </div>
+      )}
+
       <div className="mt-8 grid gap-6 xl:grid-cols-2">
-        <SimulationEnergyChart data={technology} />
+        <SimulationEnergyChart data={result} />
 
         <SimulationCostChart
           capex={result.initial_capex}

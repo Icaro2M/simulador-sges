@@ -30,6 +30,13 @@ function getResultTypeLabel(type: string) {
   }
 }
 
+function getEffectiveEnergy(result: {
+  delivered_energy_kwh?: number;
+  effective_delivered_energy_kwh?: number;
+}) {
+  return result.effective_delivered_energy_kwh ?? result.delivered_energy_kwh ?? 0;
+}
+
 function Panel({
   title,
   description,
@@ -141,7 +148,7 @@ export function DashboardPage() {
           />
 
           <DashboardMetricCard
-            title="Maior energia entregue"
+            title="Maior energia efetiva"
             value={
               summary.bestEnergy !== null
                 ? formatEnergy(summary.bestEnergy)
@@ -182,7 +189,7 @@ export function DashboardPage() {
                   }
                 >
                   <option value="lcos">LCOS</option>
-                  <option value="energy">Energia entregue</option>
+                  <option value="energy">Energia efetiva</option>
                   <option value="efficiency">Eficiência</option>
                 </select>
               </div>
@@ -233,10 +240,10 @@ export function DashboardPage() {
 
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <span className="text-xs font-semibold uppercase text-slate-500">
-                  Energia entregue
+                  Energia efetiva
                 </span>
                 <strong className="mt-2 block text-base text-slate-950">
-                  {formatEnergy(summary.bestLcosResult.delivered_energy_kwh ?? 0)}
+                  {formatEnergy(getEffectiveEnergy(summary.bestLcosResult))}
                 </strong>
               </div>
 

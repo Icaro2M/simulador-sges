@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 
 from api.schemas.dispatch import DispatchRequest, DispatchResponse
 from api.services.dispatch_service import DispatchService
+from sges.core.exceptions import InvalidParameterError
 
 
 router = APIRouter(
@@ -20,6 +21,12 @@ def dispatch(request: DispatchRequest):
         return DispatchResponse(
             success=True,
             results=results,
+        )
+
+    except InvalidParameterError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
         )
 
     except Exception as error:

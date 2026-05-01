@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 
 from api.schemas.analysis import SensitivityRequest, SensitivityResponse
 from api.services.analysis_service import AnalysisService
+from sges.core.exceptions import InvalidParameterError
 
 
 router = APIRouter(
@@ -27,6 +28,12 @@ def sensitivity(request: SensitivityRequest):
             success=True,
             parameter=request.parameter_path,
             results=results,
+        )
+
+    except InvalidParameterError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
         )
 
     except Exception as error:

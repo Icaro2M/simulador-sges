@@ -33,7 +33,11 @@ const metricLabels: Record<ComparisonMetric, string> = {
   initial_capex: "CAPEX inicial",
 };
 
-function formatMetricValue(value: number, metric: ComparisonMetric) {
+function formatMetricValue(value: number | null, metric: ComparisonMetric) {
+  if (value === null) {
+    return "Indefinido";
+  }
+
   if (metric === "lcos_per_mwh" || metric === "initial_capex") {
     return formatCurrency(value);
   }
@@ -80,7 +84,12 @@ export function ComparisonChart({
               tickLine={false}
             />
             <Tooltip
-              formatter={(value) => formatMetricValue(Number(value), metric)}
+              formatter={(value) =>
+                formatMetricValue(
+                  typeof value === "number" ? value : null,
+                  metric,
+                )
+              }
             />
             <Bar
               dataKey="value"

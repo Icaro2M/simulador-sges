@@ -38,8 +38,9 @@ export function SimulationPage() {
       type: "simulation",
       title: response.scenario_name ?? response.result.scenario_name ?? "Simulação SGES",
       createdAt: new Date().toISOString(),
-      lcos_per_mwh: response.result.lcos_result.lcos_per_mwh,
+      lcos_per_mwh: response.result.lcos_result?.lcos_per_mwh,
       delivered_energy_kwh: response.result.technology_result.delivered_energy_kwh,
+      effective_delivered_energy_kwh: response.result.effective_delivered_energy_kwh,
       rte: response.result.technology_result.round_trip_efficiency,
       capex: response.result.initial_capex,
     });

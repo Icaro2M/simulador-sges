@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { isAxiosError } from "axios";
 
 import { simulateScenario } from "../api/simulationApi";
 import type {
@@ -21,6 +22,13 @@ export function useSimulation() {
       return response;
     } catch (error) {
       console.error(error);
+      const detail = isAxiosError(error) ? error.response?.data?.detail : null;
+
+      if (typeof detail === "string") {
+        setErrorMessage(detail);
+        return null;
+      }
+
       setErrorMessage(
         "Não foi possível executar a simulação. Verifique se a API está rodando."
       );

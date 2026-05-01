@@ -10,7 +10,7 @@ export interface ComparisonResultItem {
   initial_capex: number;
   annual_opex: number;
   annual_discharged_energy_mwh: number;
-  lcos_per_mwh: number;
+  lcos_per_mwh: number | null;
 }
 
 export interface ComparisonResponse {
@@ -29,7 +29,7 @@ export interface SensitivityRequest {
 export interface SensitivityResultItem {
   parameter: string;
   value: number;
-  lcos: number;
+  lcos: number | null;
   capex: number;
   annual_energy_mwh: number;
 }
@@ -50,7 +50,7 @@ export interface MonteCarloRequest {
 export interface MonteCarloResultItem {
   iteration: number;
   sampled_values: Record<string, number>;
-  lcos: number;
+  lcos: number | null;
   capex: number;
   annual_energy_mwh: number;
   round_trip_efficiency: number;

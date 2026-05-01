@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from api.schemas.scenario import SimulationRequest
 from api.schemas.simulation import SimulationResponse
 from api.services.simulation_service import SimulationService
+from sges.core.exceptions import InvalidParameterError
 
 
 router = APIRouter(
@@ -22,6 +23,12 @@ def simulate(request: SimulationRequest):
             success=True,
             scenario_name=request.name,
             result=result,
+        )
+
+    except InvalidParameterError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
         )
 
     except Exception as error:

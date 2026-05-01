@@ -14,7 +14,7 @@ export const simulationSchema = z.object({
   mechanical_efficiency: z.number().min(0).max(1),
   auxiliary_efficiency: z.number().min(0).max(1),
 
-  cycle_loss_fraction: z.number().min(0).max(1),
+  cycle_loss_fraction: z.number().min(0).lt(1, "A perda fracionaria deve ser menor que 1"),
   fixed_cycle_loss_kwh: z.number().min(0),
   standby_loss_kwh_per_hour: z.number().min(0),
 

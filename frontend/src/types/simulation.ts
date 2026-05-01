@@ -47,10 +47,16 @@ export interface LcosResult {
 export interface SimulationResultData {
   scenario_name: string;
   technology_result: TechnologySimulationResult;
+  effective_delivered_energy_kwh: number;
+  standby_hours_per_cycle: number;
+  standby_loss_per_cycle_kwh: number;
+  annual_standby_loss_kwh: number;
+  status: string;
+  warnings: string[];
   initial_capex: number;
   annual_opex: number;
   annual_discharged_energy_mwh: number;
-  lcos_result: LcosResult;
+  lcos_result: LcosResult | null;
 }
 
 export interface SimulationResponse {

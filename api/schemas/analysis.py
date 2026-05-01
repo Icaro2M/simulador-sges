@@ -19,7 +19,7 @@ class ComparisonResultItem(BaseModel):
     initial_capex: float
     annual_opex: float
     annual_discharged_energy_mwh: float
-    lcos_per_mwh: float
+    lcos_per_mwh: float | None
 
 
 class ComparisonResponse(BaseModel):
@@ -38,7 +38,7 @@ class SensitivityRequest(BaseModel):
 class SensitivityResultItem(BaseModel):
     parameter: str
     value: float
-    lcos: float
+    lcos: float | None
     capex: float
     annual_energy_mwh: float
 
@@ -59,7 +59,7 @@ class MonteCarloRequest(BaseModel):
 class MonteCarloResultItem(BaseModel):
     iteration: int
     sampled_values: Dict[str, float]
-    lcos: float
+    lcos: float | None
     capex: float
     annual_energy_mwh: float
     round_trip_efficiency: float

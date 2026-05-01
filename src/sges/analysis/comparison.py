@@ -14,7 +14,7 @@ class ComparisonRow:
     initial_capex: float
     annual_opex: float
     annual_discharged_energy_mwh: float
-    lcos_per_mwh: float
+    lcos_per_mwh: float | None
 
 
 def build_comparison_table(results: list[SimulationResult]) -> list[ComparisonRow]:
@@ -32,8 +32,18 @@ def build_comparison_table(results: list[SimulationResult]) -> list[ComparisonRo
                 initial_capex=result.initial_capex,
                 annual_opex=result.annual_opex,
                 annual_discharged_energy_mwh=result.annual_discharged_energy_mwh,
-                lcos_per_mwh=result.lcos_result.lcos_per_mwh,
+                lcos_per_mwh=(
+                    result.lcos_result.lcos_per_mwh
+                    if result.lcos_result is not None
+                    else None
+                ),
             )
         )
 
-    return sorted(rows, key=lambda row: row.lcos_per_mwh)
+    return sorted(
+        rows,
+        key=lambda row: (
+            row.lcos_per_mwh is None,
+            row.lcos_per_mwh if row.lcos_per_mwh is not None else float("inf"),
+        ),
+    )

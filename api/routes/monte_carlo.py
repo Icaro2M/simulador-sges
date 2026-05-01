@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 
 from api.schemas.analysis import MonteCarloRequest, MonteCarloResponse
 from api.services.analysis_service import AnalysisService
+from sges.core.exceptions import InvalidParameterError
 
 
 router = APIRouter(
@@ -26,6 +27,12 @@ def monte_carlo(request: MonteCarloRequest):
             success=True,
             iterations=request.iterations,
             results=results,
+        )
+
+    except InvalidParameterError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
         )
 
     except Exception as error:

@@ -16,7 +16,7 @@ class SimulationRequest(BaseModel):
     mechanical_efficiency: float = Field(gt=0, le=1)
     auxiliary_efficiency: float = Field(default=1.0, gt=0, le=1)
 
-    cycle_loss_fraction: float = Field(default=0.0, ge=0, le=1)
+    cycle_loss_fraction: float = Field(default=0.0, ge=0, lt=1)
     fixed_cycle_loss_kwh: float = Field(default=0.0, ge=0)
     standby_loss_kwh_per_hour: float = Field(default=0.0, ge=0)
 

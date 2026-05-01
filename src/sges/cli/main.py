@@ -21,6 +21,13 @@ app = typer.Typer()
 console = Console()
 
 
+def _format_lcos(value: float | None) -> str:
+    if value is None:
+        return "undefined"
+
+    return f"${value:,.2f}/MWh"
+
+
 @app.command()
 def run(
     config: Path = Path("configs/tower_sges.yaml"),
@@ -73,7 +80,7 @@ def compare(
             f"{row.round_trip_efficiency:.2%}",
             f"${row.initial_capex:,.2f}",
             f"{row.annual_discharged_energy_mwh:,.2f} MWh",
-            f"${row.lcos_per_mwh:,.2f}/MWh",
+            _format_lcos(row.lcos_per_mwh),
         )
 
     console.print(table)
@@ -111,7 +118,7 @@ def sensitivity(
     for row in rows:
         table.add_row(
             f"{row['value']:.2f}",
-            f"${row['lcos']:,.2f}/MWh",
+            _format_lcos(row["lcos"]),
             f"${row['capex']:,.2f}",
             f"{row['annual_energy_mwh']:,.2f} MWh",
         )
@@ -150,20 +157,26 @@ def monte_carlo(
         seed=seed,
     )
 
-    best = min(rows, key=lambda row: row["lcos"])
-    worst = max(rows, key=lambda row: row["lcos"])
-    avg_lcos = sum(row["lcos"] for row in rows) / len(rows)
+    rows_with_lcos = [row for row in rows if row["lcos"] is not None]
+    best = min(rows_with_lcos, key=lambda row: row["lcos"]) if rows_with_lcos else None
+    worst = max(rows_with_lcos, key=lambda row: row["lcos"]) if rows_with_lcos else None
+    avg_lcos = (
+        sum(row["lcos"] for row in rows_with_lcos) / len(rows_with_lcos)
+        if rows_with_lcos
+        else None
+    )
 
     table = Table(title="Monte Carlo Analysis")
     table.add_column("Metric")
     table.add_column("Value")
 
     table.add_row("Iterations", str(iterations))
-    table.add_row("Average LCOS", f"${avg_lcos:,.2f}/MWh")
-    table.add_row("Best LCOS", f"${best['lcos']:,.2f}/MWh")
-    table.add_row("Worst LCOS", f"${worst['lcos']:,.2f}/MWh")
-    table.add_row("Best annual energy", f"{best['annual_energy_mwh']:,.2f} MWh")
-    table.add_row("Worst annual energy", f"{worst['annual_energy_mwh']:,.2f} MWh")
+    table.add_row("Average LCOS", _format_lcos(avg_lcos))
+    table.add_row("Best LCOS", _format_lcos(best["lcos"] if best is not None else None))
+    table.add_row("Worst LCOS", _format_lcos(worst["lcos"] if worst is not None else None))
+    if best is not None and worst is not None:
+        table.add_row("Best annual energy", f"{best['annual_energy_mwh']:,.2f} MWh")
+        table.add_row("Worst annual energy", f"{worst['annual_energy_mwh']:,.2f} MWh")
 
     console.print(table)
 
@@ -240,14 +253,28 @@ def _print_single_result(result):
     table.add_row("Technology", result.technology_result.technology_name)
     table.add_row("Stored energy", f"{result.technology_result.stored_energy_kwh:,.2f} kWh")
     table.add_row("Delivered energy", f"{result.technology_result.delivered_energy_kwh:,.2f} kWh")
+    table.add_row("Effective delivered energy", f"{result.effective_delivered_energy_kwh:,.2f} kWh")
     table.add_row("Round-trip efficiency", f"{result.technology_result.round_trip_efficiency:.2%}")
     table.add_row("Nominal power", f"{result.technology_result.nominal_power_kw:,.2f} kW")
     table.add_row("Charge time", f"{result.technology_result.charge_time_h:,.2f} h")
     table.add_row("Discharge time", f"{result.technology_result.discharge_time_h:,.2f} h")
+    table.add_row("Standby time per cycle", f"{result.standby_hours_per_cycle:,.2f} h")
+    table.add_row("Standby loss per cycle", f"{result.standby_loss_per_cycle_kwh:,.2f} kWh")
+    table.add_row("Annual standby loss", f"{result.annual_standby_loss_kwh:,.2f} kWh")
+    table.add_row("Status", result.status)
+    if result.warnings:
+        table.add_row("Warnings", " | ".join(result.warnings))
     table.add_row("Initial CAPEX", f"${result.initial_capex:,.2f}")
     table.add_row("Annual OPEX", f"${result.annual_opex:,.2f}")
     table.add_row("Annual discharged energy", f"{result.annual_discharged_energy_mwh:,.2f} MWh")
-    table.add_row("LCOS", f"${result.lcos_result.lcos_per_mwh:,.2f}/MWh")
+    table.add_row(
+        "LCOS",
+        _format_lcos(
+            result.lcos_result.lcos_per_mwh
+            if result.lcos_result is not None
+            else None
+        ),
+    )
 
     console.print(table)
 
@@ -382,7 +409,7 @@ def batch(
             f"{row.round_trip_efficiency:.2%}",
             f"${row.initial_capex:,.2f}",
             f"{row.annual_discharged_energy_mwh:,.2f} MWh",
-            f"${row.lcos_per_mwh:,.2f}/MWh",
+            _format_lcos(row.lcos_per_mwh),
         )
 
     console.print(table)

@@ -127,9 +127,15 @@ export function MonteCarloPage() {
       return;
     }
 
-    const bestLcosResult = response.results.reduce((best, current) =>
-      current.lcos < best.lcos ? current : best
+    const resultsWithLcos = response.results.filter(
+      (item) => typeof item.lcos === "number"
     );
+    const bestLcosResult =
+      resultsWithLcos.length > 0
+        ? resultsWithLcos.reduce((best, current) =>
+            current.lcos! < best.lcos! ? current : best
+          )
+        : null;
 
     const bestCapexResult = response.results.reduce((best, current) =>
       current.capex < best.capex ? current : best
@@ -150,7 +156,7 @@ export function MonteCarloPage() {
       type: "monte_carlo",
       title: `Monte Carlo: ${response.iterations} iterações`,
       createdAt: new Date().toISOString(),
-      lcos_per_mwh: bestLcosResult.lcos,
+      lcos_per_mwh: bestLcosResult?.lcos ?? undefined,
       delivered_energy_kwh: bestEnergyResult.annual_energy_mwh * 1000,
       rte: bestEfficiencyResult.round_trip_efficiency,
       capex: bestCapexResult.capex,
