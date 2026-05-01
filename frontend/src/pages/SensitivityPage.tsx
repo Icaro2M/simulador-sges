@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -26,6 +26,7 @@ const defaultValues: SensitivityRequest = {
 };
 
 export function SensitivityPage() {
+  const resultRef = useRef<HTMLDivElement | null>(null);
   const { result, isLoading, errorMessage, runSensitivity } = useSensitivity();
 
   const [metric, setMetric] = useState<SensitivityMetric>("lcos");
@@ -37,6 +38,15 @@ export function SensitivityPage() {
   } = useForm<SensitivityRequest>({
     defaultValues,
   });
+
+  useEffect(() => {
+    if (result) {
+      resultRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [result]);
 
   async function handleRunSensitivity(request: SensitivityRequest) {
     const response = await runSensitivity(request);
@@ -142,7 +152,7 @@ export function SensitivityPage() {
         )}
 
         {result && (
-          <div className="space-y-6">
+          <div className="space-y-6 scroll-mt-6" ref={resultRef}>
             <SensitivityChart
               data={result.results}
               parameter={result.parameter}

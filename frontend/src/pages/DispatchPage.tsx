@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { DispatchChart } from "../components/charts/DispatchChart";
 import { DispatchPriceProfileForm } from "../components/forms/DispatchPriceProfileForm";
@@ -107,6 +107,7 @@ function Field({
 }
 
 export function DispatchPage() {
+  const resultsRef = useRef<HTMLDivElement | null>(null);
   const { data, loading, error, executeDispatch } = useDispatch();
 
   const [scenario, setScenario] = useState<SimulationRequest>(defaultScenario);
@@ -119,6 +120,15 @@ export function DispatchPage() {
   const [initialSocKwh, setInitialSocKwh] = useState(0);
 
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (data) {
+      resultsRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [data]);
 
   function updateScenarioField<K extends keyof SimulationRequest>(
     field: K,
@@ -570,7 +580,7 @@ export function DispatchPage() {
         )}
 
         {data && data.results.length > 0 && (
-          <div className="space-y-6">
+          <div className="space-y-6 scroll-mt-6" ref={resultsRef}>
             <DispatchSummary data={data.results} />
 
             <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
@@ -610,7 +620,10 @@ export function DispatchPage() {
         )}
 
         {data && data.results.length === 0 && (
-          <section className="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
+          <section
+            className="scroll-mt-6 rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm"
+            ref={resultsRef}
+          >
             Nenhum resultado retornado pelo dispatch.
           </section>
         )}

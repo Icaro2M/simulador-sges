@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,6 +29,7 @@ const comparisonSchema = z.object({
 });
 
 export function ComparisonPage() {
+  const resultsRef = useRef<HTMLDivElement | null>(null);
   const { results, runComparison, isLoading, errorMessage } = useComparison();
 
   const [metric, setMetric] = useState<ComparisonMetric>("lcos_per_mwh");
@@ -49,6 +50,15 @@ export function ComparisonPage() {
     control,
     name: "scenarios",
   });
+
+  useEffect(() => {
+    if (results.length > 0) {
+      resultsRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [results]);
 
   async function handleComparison(data: ComparisonFormValues) {
     const scenarios: SimulationRequest[] = data.scenarios;
@@ -174,7 +184,7 @@ export function ComparisonPage() {
         )}
 
         {results.length > 0 && (
-          <div className="space-y-6">
+          <div className="space-y-6 scroll-mt-6" ref={resultsRef}>
             <ComparisonChart data={results} metric={metric} />
             <ComparisonTable data={results} />
           </div>

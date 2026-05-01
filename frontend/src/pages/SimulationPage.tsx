@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 import { SimulationForm } from "../components/forms/SimulationForm";
 import { SimulationResult } from "../components/results/SimulationResult";
 import { PageContainer } from "../components/ui/PageContainer";
@@ -5,6 +7,8 @@ import { useSimulation } from "../hooks/useSimulation";
 import { saveDashboardResult } from "../utils/localResults";
 
 export function SimulationPage() {
+  const resultRef = useRef<HTMLDivElement | null>(null);
+
   const {
     result,
     isLoading,
@@ -12,6 +16,15 @@ export function SimulationPage() {
     runSimulation,
     clearResult,
   } = useSimulation();
+
+  useEffect(() => {
+    if (result) {
+      resultRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [result]);
 
   async function handleSubmit(data: Parameters<typeof runSimulation>[0]) {
     const response = await runSimulation(data);
@@ -47,7 +60,7 @@ export function SimulationPage() {
         )}
 
         {result && (
-          <div className="space-y-4">
+          <div className="space-y-4 scroll-mt-6" ref={resultRef}>
             <SimulationResult response={result} />
 
             <div className="flex justify-end">

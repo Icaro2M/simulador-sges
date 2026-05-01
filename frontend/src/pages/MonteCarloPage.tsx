@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { MonteCarloChart } from "../components/charts/MonteCarloChart";
 import { MonteCarloParametersForm } from "../components/forms/MonteCarloParametersForm";
@@ -60,6 +60,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 export function MonteCarloPage() {
+  const resultsRef = useRef<HTMLDivElement | null>(null);
   const { data, loading, error, executeMonteCarlo } = useMonteCarlo();
 
   const [iterations, setIterations] = useState(100);
@@ -82,6 +83,15 @@ export function MonteCarloPage() {
     "economics.cost_per_kw": [500, 1200],
     "economics.discount_rate": [0.04, 0.12],
   });
+
+  useEffect(() => {
+    if (data) {
+      resultsRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [data]);
 
   function updateBaseScenario<K extends keyof SimulationRequest>(
     field: K,
@@ -340,7 +350,7 @@ export function MonteCarloPage() {
         </Panel>
 
         {data && (
-          <div className="space-y-6">
+          <div className="space-y-6 scroll-mt-6" ref={resultsRef}>
             <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
