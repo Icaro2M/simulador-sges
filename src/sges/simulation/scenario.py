@@ -7,10 +7,8 @@ class TechnologyScenario:
     mass_kg: float
     height_m: float
     nominal_power_kw: float
-    motor_efficiency: float
-    generator_efficiency: float
-    mechanical_efficiency: float
-    auxiliary_efficiency: float = 1.0
+    charge_efficiency: float
+    discharge_efficiency: float
 
 
 @dataclass(frozen=True)

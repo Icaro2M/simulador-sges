@@ -6,6 +6,7 @@ from sges.simulation.dispatcher import (
     DispatchConfig,
     run_price_arbitrage_dispatch,
 )
+from sges.physics.loss_model import LossModel
 from sges.simulation.simulator import SGESSimulator
 
 
@@ -30,6 +31,11 @@ class DispatchService:
                 low_price_threshold=request.low_price_threshold,
                 high_price_threshold=request.high_price_threshold,
                 initial_soc_kwh=request.initial_soc_kwh,
+                loss_model=LossModel(
+                    cycle_loss_fraction=scenario.losses.cycle_loss_fraction,
+                    fixed_cycle_loss_kwh=scenario.losses.fixed_cycle_loss_kwh,
+                    standby_loss_kwh_per_hour=scenario.losses.standby_loss_kwh_per_hour,
+                ),
             ),
         )
 

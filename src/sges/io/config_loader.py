@@ -16,10 +16,8 @@ class TechnologyConfig(BaseModel):
     mass_kg: float = Field(gt=0)
     height_m: float = Field(gt=0)
     nominal_power_kw: float = Field(gt=0)
-    motor_efficiency: float = Field(gt=0, le=1)
-    generator_efficiency: float = Field(gt=0, le=1)
-    mechanical_efficiency: float = Field(gt=0, le=1)
-    auxiliary_efficiency: float = Field(default=1.0, gt=0, le=1)
+    charge_efficiency: float = Field(gt=0, le=1)
+    discharge_efficiency: float = Field(gt=0, le=1)
 
 
 class LossConfig(BaseModel):
@@ -67,10 +65,8 @@ def load_scenario_from_yaml(path: str | Path) -> Scenario:
             mass_kg=config.technology.mass_kg,
             height_m=config.technology.height_m,
             nominal_power_kw=config.technology.nominal_power_kw,
-            motor_efficiency=config.technology.motor_efficiency,
-            generator_efficiency=config.technology.generator_efficiency,
-            mechanical_efficiency=config.technology.mechanical_efficiency,
-            auxiliary_efficiency=config.technology.auxiliary_efficiency,
+            charge_efficiency=config.technology.charge_efficiency,
+            discharge_efficiency=config.technology.discharge_efficiency,
         ),
         losses=LossScenario(
             cycle_loss_fraction=config.losses.cycle_loss_fraction,

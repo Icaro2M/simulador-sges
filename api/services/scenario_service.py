@@ -16,10 +16,8 @@ class ScenarioService:
                 mass_kg=request.mass_kg,
                 height_m=request.height_m,
                 nominal_power_kw=request.nominal_power_kw,
-                motor_efficiency=request.motor_efficiency,
-                generator_efficiency=request.generator_efficiency,
-                mechanical_efficiency=request.mechanical_efficiency,
-                auxiliary_efficiency=request.auxiliary_efficiency,
+                charge_efficiency=request.charge_efficiency,
+                discharge_efficiency=request.discharge_efficiency,
             ),
             losses=LossScenario(
                 cycle_loss_fraction=request.cycle_loss_fraction,

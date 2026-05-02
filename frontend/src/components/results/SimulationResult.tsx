@@ -49,6 +49,11 @@ export function SimulationResult({ response }: SimulationResultProps) {
       unit: "kWh",
     },
     {
+      label: "Energia requerida na carga",
+      value: formatNumber(technology.required_charge_energy_kwh),
+      unit: "kWh",
+    },
+    {
       label: "Energia entregue",
       value: formatNumber(technology.delivered_energy_kwh),
       unit: "kWh",
@@ -57,6 +62,14 @@ export function SimulationResult({ response }: SimulationResultProps) {
       label: "Energia efetiva entregue",
       value: formatNumber(result.effective_delivered_energy_kwh),
       unit: "kWh",
+    },
+    {
+      label: "Eficiência de carga",
+      value: formatPercent(technology.charge_efficiency),
+    },
+    {
+      label: "Eficiência de descarga",
+      value: formatPercent(technology.discharge_efficiency),
     },
     {
       label: "Eficiência round-trip",

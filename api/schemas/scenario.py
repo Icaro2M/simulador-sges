@@ -11,10 +11,8 @@ class SimulationRequest(BaseModel):
     height_m: float = Field(gt=0)
     nominal_power_kw: float = Field(gt=0)
 
-    motor_efficiency: float = Field(gt=0, le=1)
-    generator_efficiency: float = Field(gt=0, le=1)
-    mechanical_efficiency: float = Field(gt=0, le=1)
-    auxiliary_efficiency: float = Field(default=1.0, gt=0, le=1)
+    charge_efficiency: float = Field(gt=0, le=1)
+    discharge_efficiency: float = Field(gt=0, le=1)
 
     cycle_loss_fraction: float = Field(default=0.0, ge=0, lt=1)
     fixed_cycle_loss_kwh: float = Field(default=0.0, ge=0)

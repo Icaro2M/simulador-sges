@@ -74,49 +74,27 @@ export function TechnologyForm({ register, errors }: Props) {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2">
           <label className="grid gap-2 text-sm font-semibold text-slate-700">
-            Motor
+            Carga
             <input
               className={numberInputClass}
               type="number"
               step="any"
-              {...register("motor_efficiency", { valueAsNumber: true })}
+              {...register("charge_efficiency", { valueAsNumber: true })}
             />
-            <FieldError message={errors.motor_efficiency?.message} />
+            <FieldError message={errors.charge_efficiency?.message} />
           </label>
 
           <label className="grid gap-2 text-sm font-semibold text-slate-700">
-            Gerador
+            Descarga
             <input
               className={numberInputClass}
               type="number"
               step="any"
-              {...register("generator_efficiency", { valueAsNumber: true })}
+              {...register("discharge_efficiency", { valueAsNumber: true })}
             />
-            <FieldError message={errors.generator_efficiency?.message} />
-          </label>
-
-          <label className="grid gap-2 text-sm font-semibold text-slate-700">
-            Mecânica
-            <input
-              className={numberInputClass}
-              type="number"
-              step="any"
-              {...register("mechanical_efficiency", { valueAsNumber: true })}
-            />
-            <FieldError message={errors.mechanical_efficiency?.message} />
-          </label>
-
-          <label className="grid gap-2 text-sm font-semibold text-slate-700">
-            Auxiliar
-            <input
-              className={numberInputClass}
-              type="number"
-              step="any"
-              {...register("auxiliary_efficiency", { valueAsNumber: true })}
-            />
-            <FieldError message={errors.auxiliary_efficiency?.message} />
+            <FieldError message={errors.discharge_efficiency?.message} />
           </label>
         </div>
       </section>

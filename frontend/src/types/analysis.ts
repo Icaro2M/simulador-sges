@@ -4,7 +4,10 @@ export interface ComparisonResultItem {
   scenario_name: string;
   technology_name: string;
   stored_energy_kwh: number;
+  required_charge_energy_kwh: number;
   delivered_energy_kwh: number;
+  charge_efficiency: number;
+  discharge_efficiency: number;
   round_trip_efficiency: number;
   nominal_power_kw: number;
   initial_capex: number;

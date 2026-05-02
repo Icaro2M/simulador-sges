@@ -54,6 +54,8 @@ export function SensitivityForm({ register, errors }: Props) {
               <option value="technology.height_m">Altura</option>
               <option value="technology.mass_kg">Massa</option>
               <option value="technology.nominal_power_kw">Potência nominal</option>
+              <option value="technology.charge_efficiency">Eficiência de carga</option>
+              <option value="technology.discharge_efficiency">Eficiência de descarga</option>
 
               <option value="economics.cost_per_kw">Custo por kW</option>
               <option value="economics.cost_per_kwh">Custo por kWh</option>
@@ -179,69 +181,38 @@ export function SensitivityForm({ register, errors }: Props) {
           </label>
         </div>
       </FormSection>
-
       <FormSection
         title="Eficiências"
-        description="Eficiências de conversão e recuperação."
+        description="Eficiências de carga e descarga."
       >
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2">
           <label className="grid gap-2 text-sm font-semibold text-slate-700">
-            Motor
+            Carga
             <input
               className={controlClass}
               type="number"
               step="any"
-              {...register("base_scenario.motor_efficiency", {
+              {...register("base_scenario.charge_efficiency", {
                 valueAsNumber: true,
               })}
             />
             <FieldError
-              message={errors.base_scenario?.motor_efficiency?.message}
+              message={errors.base_scenario?.charge_efficiency?.message}
             />
           </label>
 
           <label className="grid gap-2 text-sm font-semibold text-slate-700">
-            Gerador
+            Descarga
             <input
               className={controlClass}
               type="number"
               step="any"
-              {...register("base_scenario.generator_efficiency", {
+              {...register("base_scenario.discharge_efficiency", {
                 valueAsNumber: true,
               })}
             />
             <FieldError
-              message={errors.base_scenario?.generator_efficiency?.message}
-            />
-          </label>
-
-          <label className="grid gap-2 text-sm font-semibold text-slate-700">
-            Mecânica
-            <input
-              className={controlClass}
-              type="number"
-              step="any"
-              {...register("base_scenario.mechanical_efficiency", {
-                valueAsNumber: true,
-              })}
-            />
-            <FieldError
-              message={errors.base_scenario?.mechanical_efficiency?.message}
-            />
-          </label>
-
-          <label className="grid gap-2 text-sm font-semibold text-slate-700">
-            Auxiliar
-            <input
-              className={controlClass}
-              type="number"
-              step="any"
-              {...register("base_scenario.auxiliary_efficiency", {
-                valueAsNumber: true,
-              })}
-            />
-            <FieldError
-              message={errors.base_scenario?.auxiliary_efficiency?.message}
+              message={errors.base_scenario?.discharge_efficiency?.message}
             />
           </label>
         </div>

@@ -9,10 +9,8 @@ export const simulationSchema = z.object({
   height_m: z.number().positive("A altura deve ser maior que zero"),
   nominal_power_kw: z.number().positive("A potência deve ser maior que zero"),
 
-  motor_efficiency: z.number().min(0).max(1),
-  generator_efficiency: z.number().min(0).max(1),
-  mechanical_efficiency: z.number().min(0).max(1),
-  auxiliary_efficiency: z.number().min(0).max(1),
+  charge_efficiency: z.number().min(0).max(1),
+  discharge_efficiency: z.number().min(0).max(1),
 
   cycle_loss_fraction: z.number().min(0).lt(1, "A perda fracionaria deve ser menor que 1"),
   fixed_cycle_loss_kwh: z.number().min(0),

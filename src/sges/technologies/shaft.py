@@ -12,10 +12,8 @@ class ShaftSGES(GravityStorageTechnology):
     mass_kg: float
     depth_m: float
     nominal_power_kw: float
-    motor_efficiency: float
-    generator_efficiency: float
-    mechanical_efficiency: float
-    auxiliary_efficiency: float = 1.0
+    charge_efficiency: float
+    discharge_efficiency: float
     loss_model: LossModel = LossModel()
 
     def simulate(self) -> TechnologyResult:
@@ -31,25 +29,29 @@ class ShaftSGES(GravityStorageTechnology):
 
         round_trip_efficiency = calculate_round_trip_efficiency(
             EfficiencyChain(
-                motor_efficiency=self.motor_efficiency,
-                generator_efficiency=self.generator_efficiency,
-                mechanical_efficiency=self.mechanical_efficiency,
-                auxiliary_efficiency=self.auxiliary_efficiency,
+                charge_efficiency=self.charge_efficiency,
+                discharge_efficiency=self.discharge_efficiency,
             )
         )
 
-        delivered_energy_kwh = energy.energy_kwh * round_trip_efficiency
+        required_charge_energy_kwh = energy.energy_kwh / self.charge_efficiency
+        delivered_energy_kwh = energy.energy_kwh * self.discharge_efficiency
         delivered_energy_kwh = self.loss_model.apply_cycle_losses(delivered_energy_kwh)
 
-        effective_round_trip_efficiency = delivered_energy_kwh / energy.energy_kwh
+        effective_round_trip_efficiency = (
+            delivered_energy_kwh / required_charge_energy_kwh
+        )
 
-        charge_time_h = energy.energy_kwh / self.nominal_power_kw
+        charge_time_h = required_charge_energy_kwh / self.nominal_power_kw
         discharge_time_h = delivered_energy_kwh / self.nominal_power_kw
 
         return TechnologyResult(
             technology_name="Shaft SGES",
             stored_energy_kwh=energy.energy_kwh,
+            required_charge_energy_kwh=required_charge_energy_kwh,
             delivered_energy_kwh=delivered_energy_kwh,
+            charge_efficiency=self.charge_efficiency,
+            discharge_efficiency=self.discharge_efficiency,
             round_trip_efficiency=effective_round_trip_efficiency,
             nominal_power_kw=self.nominal_power_kw,
             charge_time_h=charge_time_h,

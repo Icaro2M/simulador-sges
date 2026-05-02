@@ -142,9 +142,8 @@ def monte_carlo(
     parameter_ranges = {
         "technology.height_m": (50, 500),
         "technology.mass_kg": (300_000, 1_500_000),
-        "technology.motor_efficiency": (0.85, 0.95),
-        "technology.generator_efficiency": (0.85, 0.95),
-        "technology.mechanical_efficiency": (0.80, 0.95),
+        "technology.charge_efficiency": (0.85, 0.95),
+        "technology.discharge_efficiency": (0.85, 0.95),
         "economics.cost_per_kw": (700, 1800),
         "economics.cost_per_kwh": (40, 150),
         "economics.cycles_per_year": (150, 500),
@@ -252,8 +251,17 @@ def _print_single_result(result):
 
     table.add_row("Technology", result.technology_result.technology_name)
     table.add_row("Stored energy", f"{result.technology_result.stored_energy_kwh:,.2f} kWh")
+    table.add_row(
+        "Required charge energy",
+        f"{result.technology_result.required_charge_energy_kwh:,.2f} kWh",
+    )
     table.add_row("Delivered energy", f"{result.technology_result.delivered_energy_kwh:,.2f} kWh")
     table.add_row("Effective delivered energy", f"{result.effective_delivered_energy_kwh:,.2f} kWh")
+    table.add_row("Charge efficiency", f"{result.technology_result.charge_efficiency:.2%}")
+    table.add_row(
+        "Discharge efficiency",
+        f"{result.technology_result.discharge_efficiency:.2%}",
+    )
     table.add_row("Round-trip efficiency", f"{result.technology_result.round_trip_efficiency:.2%}")
     table.add_row("Nominal power", f"{result.technology_result.nominal_power_kw:,.2f} kW")
     table.add_row("Charge time", f"{result.technology_result.charge_time_h:,.2f} h")
@@ -291,7 +299,10 @@ def _export_comparison_csv(rows, output: Path):
                 "scenario_name",
                 "technology_name",
                 "stored_energy_kwh",
+                "required_charge_energy_kwh",
                 "delivered_energy_kwh",
+                "charge_efficiency",
+                "discharge_efficiency",
                 "round_trip_efficiency",
                 "nominal_power_kw",
                 "initial_capex",
@@ -308,7 +319,10 @@ def _export_comparison_csv(rows, output: Path):
                     row.scenario_name,
                     row.technology_name,
                     row.stored_energy_kwh,
+                    row.required_charge_energy_kwh,
                     row.delivered_energy_kwh,
+                    row.charge_efficiency,
+                    row.discharge_efficiency,
                     row.round_trip_efficiency,
                     row.nominal_power_kw,
                     row.initial_capex,

@@ -5,10 +5,8 @@ technology:
   mass_kg: 2000000
   height_m: 300
   nominal_power_kw: 2000
-  motor_efficiency: 0.93
-  generator_efficiency: 0.93
-  mechanical_efficiency: 0.92
-  auxiliary_efficiency: 0.98
+  charge_efficiency: 0.8556
+  discharge_efficiency: 0.9114
 
 losses:
   cycle_loss_fraction: 0.015

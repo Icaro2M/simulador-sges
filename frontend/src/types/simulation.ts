@@ -8,10 +8,8 @@ export interface SimulationRequest {
   height_m: number;
   nominal_power_kw: number;
 
-  motor_efficiency: number;
-  generator_efficiency: number;
-  mechanical_efficiency: number;
-  auxiliary_efficiency: number;
+  charge_efficiency: number;
+  discharge_efficiency: number;
 
   cycle_loss_fraction: number;
   fixed_cycle_loss_kwh: number;
@@ -31,7 +29,10 @@ export interface SimulationRequest {
 export interface TechnologySimulationResult {
   technology_name: string;
   stored_energy_kwh: number;
+  required_charge_energy_kwh: number;
   delivered_energy_kwh: number;
+  charge_efficiency: number;
+  discharge_efficiency: number;
   round_trip_efficiency: number;
   nominal_power_kw: number;
   charge_time_h: number;

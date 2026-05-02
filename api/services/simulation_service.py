@@ -30,7 +30,12 @@ class SimulationService:
                 "technology_name": scenario_request.technology_type,
 
                 "stored_energy_kwh": technology_result["stored_energy_kwh"],
+                "required_charge_energy_kwh": technology_result[
+                    "required_charge_energy_kwh"
+                ],
                 "delivered_energy_kwh": technology_result["delivered_energy_kwh"],
+                "charge_efficiency": technology_result["charge_efficiency"],
+                "discharge_efficiency": technology_result["discharge_efficiency"],
                 "round_trip_efficiency": technology_result["round_trip_efficiency"],
                 "nominal_power_kw": technology_result["nominal_power_kw"],
 

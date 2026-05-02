@@ -27,8 +27,8 @@ class SGESSimulator:
         effective_stored_energy_kwh = (
             technology_result.stored_energy_kwh - standby_loss_per_cycle_kwh
         )
-        effective_delivered_energy_kwh = (
-            effective_stored_energy_kwh * technology_result.round_trip_efficiency
+        effective_delivered_energy_kwh = loss_model.apply_cycle_losses(
+            effective_stored_energy_kwh * technology_result.discharge_efficiency
         )
         annual_standby_loss_kwh = (
             standby_loss_per_cycle_kwh * scenario.economics.cycles_per_year
@@ -115,10 +115,8 @@ class SGESSimulator:
                 mass_kg=technology.mass_kg,
                 height_m=technology.height_m,
                 nominal_power_kw=technology.nominal_power_kw,
-                motor_efficiency=technology.motor_efficiency,
-                generator_efficiency=technology.generator_efficiency,
-                mechanical_efficiency=technology.mechanical_efficiency,
-                auxiliary_efficiency=technology.auxiliary_efficiency,
+                charge_efficiency=technology.charge_efficiency,
+                discharge_efficiency=technology.discharge_efficiency,
                 loss_model=loss_model,
             )
 
@@ -127,10 +125,8 @@ class SGESSimulator:
                 mass_kg=technology.mass_kg,
                 depth_m=technology.height_m,
                 nominal_power_kw=technology.nominal_power_kw,
-                motor_efficiency=technology.motor_efficiency,
-                generator_efficiency=technology.generator_efficiency,
-                mechanical_efficiency=technology.mechanical_efficiency,
-                auxiliary_efficiency=technology.auxiliary_efficiency,
+                charge_efficiency=technology.charge_efficiency,
+                discharge_efficiency=technology.discharge_efficiency,
                 loss_model=loss_model,
             )
 

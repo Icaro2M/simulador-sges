@@ -22,7 +22,8 @@ def run_price_arbitrage_dispatch(
     capacity_kwh = simulation_result.technology_result.stored_energy_kwh
     delivered_capacity_kwh = simulation_result.technology_result.delivered_energy_kwh
     power_kw = simulation_result.technology_result.nominal_power_kw
-    rte = simulation_result.technology_result.round_trip_efficiency
+    charge_efficiency = simulation_result.technology_result.charge_efficiency
+    discharge_efficiency = simulation_result.technology_result.discharge_efficiency
 
     soc_kwh = min(max(config.initial_soc_kwh, 0.0), capacity_kwh)
 
@@ -48,19 +49,21 @@ def run_price_arbitrage_dispatch(
 
         if price <= config.low_price_threshold and soc_kwh < capacity_kwh:
             action = "charge"
-            charged_kwh = min(power_kw, capacity_kwh - soc_kwh)
-            soc_kwh += charged_kwh
+            charged_kwh = min(power_kw, (capacity_kwh - soc_kwh) / charge_efficiency)
+            soc_kwh += charged_kwh * charge_efficiency
             cost = (charged_kwh / 1000) * price
 
         elif price >= config.high_price_threshold and soc_kwh > 0:
             action = "discharge"
-            available_delivered_kwh = min(
+            raw_delivered_kwh = min(
                 power_kw,
-                soc_kwh * rte,
+                soc_kwh * discharge_efficiency,
+            )
+            discharged_kwh = min(
+                config.loss_model.apply_cycle_losses(raw_delivered_kwh),
                 delivered_capacity_kwh,
             )
-            discharged_kwh = available_delivered_kwh
-            soc_kwh -= discharged_kwh / rte
+            soc_kwh -= raw_delivered_kwh / discharge_efficiency
             revenue = (discharged_kwh / 1000) * price
 
         rows.append(

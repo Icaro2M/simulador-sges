@@ -22,10 +22,8 @@ const defaultValues: SimulationRequest = {
   height_m: 100,
   nominal_power_kw: 500,
 
-  motor_efficiency: 0.9,
-  generator_efficiency: 0.9,
-  mechanical_efficiency: 0.95,
-  auxiliary_efficiency: 1,
+  charge_efficiency: 0.9,
+  discharge_efficiency: 0.9,
 
   cycle_loss_fraction: 0.02,
   fixed_cycle_loss_kwh: 0,

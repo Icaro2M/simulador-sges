@@ -150,62 +150,35 @@ export function ComparisonScenarioForm({
             </label>
           </div>
         </FormGroup>
-
         <FormGroup
           title="Eficiências"
-          description="Eficiências de conversão e perdas internas."
+          description="Eficiências de carga e descarga."
         >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2">
             <label className="grid gap-2 text-sm font-semibold text-slate-700">
-              Motor
+              Carga
               <input
                 className={controlClass}
                 type="number"
                 step="any"
-                {...register(`${fieldPrefix}.motor_efficiency`, {
+                {...register(`${fieldPrefix}.charge_efficiency`, {
                   valueAsNumber: true,
                 })}
               />
-              <FieldError message={errors?.motor_efficiency?.message} />
+              <FieldError message={errors?.charge_efficiency?.message} />
             </label>
 
             <label className="grid gap-2 text-sm font-semibold text-slate-700">
-              Gerador
+              Descarga
               <input
                 className={controlClass}
                 type="number"
                 step="any"
-                {...register(`${fieldPrefix}.generator_efficiency`, {
+                {...register(`${fieldPrefix}.discharge_efficiency`, {
                   valueAsNumber: true,
                 })}
               />
-              <FieldError message={errors?.generator_efficiency?.message} />
-            </label>
-
-            <label className="grid gap-2 text-sm font-semibold text-slate-700">
-              Mecânica
-              <input
-                className={controlClass}
-                type="number"
-                step="any"
-                {...register(`${fieldPrefix}.mechanical_efficiency`, {
-                  valueAsNumber: true,
-                })}
-              />
-              <FieldError message={errors?.mechanical_efficiency?.message} />
-            </label>
-
-            <label className="grid gap-2 text-sm font-semibold text-slate-700">
-              Auxiliar
-              <input
-                className={controlClass}
-                type="number"
-                step="any"
-                {...register(`${fieldPrefix}.auxiliary_efficiency`, {
-                  valueAsNumber: true,
-                })}
-              />
-              <FieldError message={errors?.auxiliary_efficiency?.message} />
+              <FieldError message={errors?.discharge_efficiency?.message} />
             </label>
           </div>
         </FormGroup>

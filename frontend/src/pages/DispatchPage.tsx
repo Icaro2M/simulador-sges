@@ -23,10 +23,8 @@ const defaultScenario: SimulationRequest = {
   height_m: 100,
   nominal_power_kw: 500,
 
-  motor_efficiency: 0.9,
-  generator_efficiency: 0.9,
-  mechanical_efficiency: 0.95,
-  auxiliary_efficiency: 0.98,
+  charge_efficiency: 0.9,
+  discharge_efficiency: 0.9,
 
   cycle_loss_fraction: 0.02,
   fixed_cycle_loss_kwh: 5,
@@ -158,6 +156,16 @@ export function DispatchPage() {
 
     if (scenario.nominal_power_kw <= 0) {
       setValidationError("A potência nominal precisa ser maior que zero.");
+      return false;
+    }
+
+    if (scenario.charge_efficiency <= 0 || scenario.charge_efficiency > 1) {
+      setValidationError("A eficiÃªncia de carga precisa estar entre 0 e 1.");
+      return false;
+    }
+
+    if (scenario.discharge_efficiency <= 0 || scenario.discharge_efficiency > 1) {
+      setValidationError("A eficiÃªncia de descarga precisa estar entre 0 e 1.");
       return false;
     }
 
@@ -309,63 +317,32 @@ export function DispatchPage() {
             </Field>
           </div>
         </FormSection>
-
         <FormSection title="Eficiências e perdas">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <Field label="Eficiência do motor">
+            <Field label="Eficiência de carga">
               <input
                 className={inputClass}
                 type="number"
                 step="0.01"
-                value={scenario.motor_efficiency}
+                value={scenario.charge_efficiency}
                 onChange={(event) =>
                   updateScenarioField(
-                    "motor_efficiency",
+                    "charge_efficiency",
                     Number(event.target.value)
                   )
                 }
               />
             </Field>
 
-            <Field label="Eficiência do gerador">
+            <Field label="Eficiência de descarga">
               <input
                 className={inputClass}
                 type="number"
                 step="0.01"
-                value={scenario.generator_efficiency}
+                value={scenario.discharge_efficiency}
                 onChange={(event) =>
                   updateScenarioField(
-                    "generator_efficiency",
-                    Number(event.target.value)
-                  )
-                }
-              />
-            </Field>
-
-            <Field label="Eficiência mecânica">
-              <input
-                className={inputClass}
-                type="number"
-                step="0.01"
-                value={scenario.mechanical_efficiency}
-                onChange={(event) =>
-                  updateScenarioField(
-                    "mechanical_efficiency",
-                    Number(event.target.value)
-                  )
-                }
-              />
-            </Field>
-
-            <Field label="Eficiência auxiliar">
-              <input
-                className={inputClass}
-                type="number"
-                step="0.01"
-                value={scenario.auxiliary_efficiency}
-                onChange={(event) =>
-                  updateScenarioField(
-                    "auxiliary_efficiency",
+                    "discharge_efficiency",
                     Number(event.target.value)
                   )
                 }
