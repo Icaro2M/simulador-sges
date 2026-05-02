@@ -148,6 +148,7 @@ def monte_carlo(
         "technology.discharge_efficiency": (0.85, 0.95),
         "economics.cost_per_kw": (700, 1800),
         "economics.cost_per_kwh": (40, 150),
+        "economics.charging_energy_cost_per_mwh": (0, 100),
         "economics.cycles_per_year": (150, 500),
     }
 
@@ -301,6 +302,10 @@ def _print_single_result(result):
     table.add_row("Cycle loss per cycle", f"{result.cycle_loss_per_cycle_kwh:,.2f} kWh")
     table.add_row("Total loss per cycle", f"{result.total_loss_per_cycle_kwh:,.2f} kWh")
     table.add_row("Annual standby loss", f"{result.annual_standby_loss_kwh:,.2f} kWh")
+    table.add_row("Annual discharged energy", f"{result.annual_discharged_energy_mwh:,.2f} MWh")
+    table.add_row("Annual charging energy", f"{result.annual_charging_energy_mwh:,.2f} MWh")
+    table.add_row("Annual charging cost", f"${result.annual_charging_energy_cost:,.2f}")
+    table.add_row("Annual LCOS cost", f"${result.annual_lcos_cost:,.2f}")
     table.add_row("Status", result.status)
     if result.warnings:
         table.add_row("Warnings", " | ".join(result.warnings))

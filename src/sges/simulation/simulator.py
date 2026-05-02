@@ -59,6 +59,12 @@ class SGESSimulator:
             effective_delivered_energy_kwh
             * scenario.economics.cycles_per_year
         ) / 1000
+        annual_charging_energy_mwh = (
+            annual_discharged_energy_mwh / effective_round_trip_efficiency
+            if annual_discharged_energy_mwh > 0
+            and effective_round_trip_efficiency > 0
+            else 0.0
+        )
 
         capex_model = CapexModel(
             cost_per_kw=scenario.economics.cost_per_kw,
@@ -79,12 +85,17 @@ class SGESSimulator:
         annual_opex = opex_model.calculate_annual(
             discharged_energy_mwh_per_year=annual_discharged_energy_mwh,
         )
+        annual_charging_energy_cost = (
+            annual_charging_energy_mwh
+            * scenario.economics.charging_energy_cost_per_mwh
+        )
+        annual_lcos_cost = annual_opex + annual_charging_energy_cost
 
         status = "ok"
         warnings = []
         lcos_result = None
 
-        if annual_discharged_energy_mwh > 0:
+        if annual_discharged_energy_mwh > 0 and effective_round_trip_efficiency > 0:
             lcos_result = calculate_lcos(
                 LcosInput(
                     initial_capex=initial_capex,
@@ -92,6 +103,7 @@ class SGESSimulator:
                     annual_discharged_energy_mwh=annual_discharged_energy_mwh,
                     project_lifetime_years=scenario.economics.project_lifetime_years,
                     discount_rate=scenario.economics.discount_rate,
+                    annual_charging_energy_cost=annual_charging_energy_cost,
                 )
             )
         else:
@@ -126,6 +138,9 @@ class SGESSimulator:
             initial_capex=initial_capex,
             annual_opex=annual_opex,
             annual_discharged_energy_mwh=annual_discharged_energy_mwh,
+            annual_charging_energy_mwh=annual_charging_energy_mwh,
+            annual_charging_energy_cost=annual_charging_energy_cost,
+            annual_lcos_cost=annual_lcos_cost,
             lcos_result=lcos_result,
         )
 

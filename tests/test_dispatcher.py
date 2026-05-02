@@ -46,6 +46,9 @@ def make_simulation_result() -> SimulationResult:
         initial_capex=0.0,
         annual_opex=0.0,
         annual_discharged_energy_mwh=0.0,
+        annual_charging_energy_mwh=0.0,
+        annual_charging_energy_cost=0.0,
+        annual_lcos_cost=0.0,
         lcos_result=None,
     )
 

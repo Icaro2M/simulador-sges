@@ -69,6 +69,10 @@ export function SensitivityForm({ register, errors }: Props) {
                 OPEX variável por MWh
               </option>
 
+              <option value="economics.charging_energy_cost_per_mwh">
+                Custo da energia de carga
+              </option>
+
               <option value="losses.cycle_loss_fraction">Perda por ciclo</option>
               <option value="losses.fixed_cycle_loss_kwh">
                 Perda fixa por ciclo

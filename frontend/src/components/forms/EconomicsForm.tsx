@@ -84,6 +84,17 @@ export function EconomicsForm({ register, errors }: Props) {
         </label>
 
         <label className="grid gap-2 text-sm font-semibold text-slate-700">
+          Custo da energia de carga por MWh
+          <input
+            className={numberInputClass}
+            type="number"
+            step="any"
+            {...register("charging_energy_cost_per_mwh", { valueAsNumber: true })}
+          />
+          <FieldError message={errors.charging_energy_cost_per_mwh?.message} />
+        </label>
+
+        <label className="grid gap-2 text-sm font-semibold text-slate-700">
           Vida útil (anos)
           <input
             className={numberInputClass}

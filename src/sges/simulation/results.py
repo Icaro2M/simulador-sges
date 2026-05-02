@@ -25,4 +25,7 @@ class SimulationResult:
     initial_capex: float
     annual_opex: float
     annual_discharged_energy_mwh: float
+    annual_charging_energy_mwh: float
+    annual_charging_energy_cost: float
+    annual_lcos_cost: float
     lcos_result: LcosResult | None

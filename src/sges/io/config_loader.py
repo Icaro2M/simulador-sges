@@ -52,6 +52,7 @@ class EconomicsConfig(BaseModel):
     fixed_capex: float = Field(ge=0)
     fixed_annual_opex: float = Field(ge=0)
     variable_opex_per_mwh: float = Field(ge=0)
+    charging_energy_cost_per_mwh: float = Field(default=0.0, ge=0)
     project_lifetime_years: int = Field(gt=0)
     discount_rate: float = Field(ge=0)
     cycles_per_year: int = Field(gt=0)
@@ -101,6 +102,7 @@ def load_scenario_from_yaml(path: str | Path) -> Scenario:
             fixed_capex=config.economics.fixed_capex,
             fixed_annual_opex=config.economics.fixed_annual_opex,
             variable_opex_per_mwh=config.economics.variable_opex_per_mwh,
+            charging_energy_cost_per_mwh=config.economics.charging_energy_cost_per_mwh,
             project_lifetime_years=config.economics.project_lifetime_years,
             discount_rate=config.economics.discount_rate,
             cycles_per_year=config.economics.cycles_per_year,

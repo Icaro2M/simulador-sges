@@ -65,6 +65,14 @@ export function SimulationResult({ response }: SimulationResultProps) {
     standbyOutputLossPerCycleKwh + cycleLossPerCycleKwh;
   const effectiveRoundTripEfficiency =
     result.effective_round_trip_efficiency ?? technology.round_trip_efficiency;
+  const annualChargingEnergyMwh =
+    result.annual_charging_energy_mwh ??
+    (result.annual_discharged_energy_mwh > 0 && effectiveRoundTripEfficiency > 0
+      ? result.annual_discharged_energy_mwh / effectiveRoundTripEfficiency
+      : 0);
+  const annualChargingEnergyCost = result.annual_charging_energy_cost ?? 0;
+  const annualLcosCost =
+    result.annual_lcos_cost ?? result.annual_opex + annualChargingEnergyCost;
 
   const technicalRows = [
     {
@@ -194,6 +202,19 @@ export function SimulationResult({ response }: SimulationResultProps) {
       value: formatCurrency(result.annual_opex),
     },
     {
+      label: "Energia anual necessaria para carga",
+      value: formatNumber(annualChargingEnergyMwh),
+      unit: "MWh",
+    },
+    {
+      label: "Custo anual de carregamento",
+      value: formatCurrency(annualChargingEnergyCost),
+    },
+    {
+      label: "Custo anual considerado no LCOS",
+      value: formatCurrency(annualLcosCost),
+    },
+    {
       label: "Energia anual descarregada",
       value: formatNumber(result.annual_discharged_energy_mwh),
       unit: "MWh",
@@ -265,6 +286,7 @@ export function SimulationResult({ response }: SimulationResultProps) {
         <SimulationCostChart
           capex={result.initial_capex}
           opex={result.annual_opex}
+          chargingEnergyCost={annualChargingEnergyCost}
         />
       </div>
 

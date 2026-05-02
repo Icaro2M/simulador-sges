@@ -32,6 +32,7 @@ class ScenarioService:
                 fixed_capex=request.fixed_capex,
                 fixed_annual_opex=request.fixed_annual_opex,
                 variable_opex_per_mwh=request.variable_opex_per_mwh,
+                charging_energy_cost_per_mwh=request.charging_energy_cost_per_mwh,
                 project_lifetime_years=request.project_lifetime_years,
                 discount_rate=request.discount_rate,
                 cycles_per_year=request.cycles_per_year,

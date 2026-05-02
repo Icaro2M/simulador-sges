@@ -5,9 +5,10 @@ import { formatCurrency } from "../../utils/formatters";
 interface Props {
   capex: number;
   opex: number;
+  chargingEnergyCost?: number;
 }
 
-const colors = ["#2563eb", "#16a34a"];
+const colors = ["#2563eb", "#16a34a", "#f59e0b"];
 
 function formatCostLabel(value: number) {
   return value.toLocaleString("pt-BR", {
@@ -18,10 +19,11 @@ function formatCostLabel(value: number) {
   });
 }
 
-export function SimulationCostChart({ capex, opex }: Props) {
+export function SimulationCostChart({ capex, opex, chargingEnergyCost = 0 }: Props) {
   const data = [
     { name: "CAPEX", value: capex },
-    { name: "OPEX (acumulado)", value: opex },
+    { name: "OPEX anual", value: opex },
+    { name: "Custo de carga anual", value: chargingEnergyCost },
   ];
 
   return (

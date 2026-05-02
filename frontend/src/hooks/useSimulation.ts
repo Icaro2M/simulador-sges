@@ -7,6 +7,36 @@ import type {
   SimulationResponse,
 } from "../types/simulation";
 
+function completeChargingCostFields(
+  response: SimulationResponse,
+  request: SimulationRequest
+): SimulationResponse {
+  const result = response.result;
+  const effectiveRoundTripEfficiency =
+    result.effective_round_trip_efficiency ??
+    result.technology_result.round_trip_efficiency;
+  const annualChargingEnergyMwh =
+    result.annual_charging_energy_mwh ??
+    (result.annual_discharged_energy_mwh > 0 && effectiveRoundTripEfficiency > 0
+      ? result.annual_discharged_energy_mwh / effectiveRoundTripEfficiency
+      : 0);
+  const annualChargingEnergyCost =
+    result.annual_charging_energy_cost ??
+    annualChargingEnergyMwh * request.charging_energy_cost_per_mwh;
+  const annualLcosCost =
+    result.annual_lcos_cost ?? result.annual_opex + annualChargingEnergyCost;
+
+  return {
+    ...response,
+    result: {
+      ...result,
+      annual_charging_energy_mwh: annualChargingEnergyMwh,
+      annual_charging_energy_cost: annualChargingEnergyCost,
+      annual_lcos_cost: annualLcosCost,
+    },
+  };
+}
+
 export function useSimulation() {
   const [result, setResult] = useState<SimulationResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -17,7 +47,10 @@ export function useSimulation() {
       setIsLoading(true);
       setErrorMessage(null);
 
-      const response = await simulateScenario(data);
+      const response = completeChargingCostFields(
+        await simulateScenario(data),
+        data
+      );
       setResult(response);
       return response;
     } catch (error) {

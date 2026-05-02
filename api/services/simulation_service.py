@@ -46,6 +46,13 @@ class SimulationService:
                 "annual_discharged_energy_mwh": result[
                     "annual_discharged_energy_mwh"
                 ],
+                "annual_charging_energy_mwh": result[
+                    "annual_charging_energy_mwh"
+                ],
+                "annual_charging_energy_cost": result[
+                    "annual_charging_energy_cost"
+                ],
+                "annual_lcos_cost": result["annual_lcos_cost"],
                 "lcos_per_mwh": (
                     result["lcos_result"]["lcos_per_mwh"]
                     if result["lcos_result"] is not None

@@ -23,6 +23,7 @@ export const simulationSchema = z.object({
   fixed_capex: z.number().min(0),
   fixed_annual_opex: z.number().min(0),
   variable_opex_per_mwh: z.number().min(0),
+  charging_energy_cost_per_mwh: z.number().min(0),
 
   project_lifetime_years: z.number().positive(),
   discount_rate: z.number().min(0).max(1),

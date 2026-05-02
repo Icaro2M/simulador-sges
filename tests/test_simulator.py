@@ -104,6 +104,38 @@ def test_charge_and_discharge_power_limits_affect_only_their_cycle_times():
     )
 
 
+def test_charging_energy_cost_is_included_in_lcos_inputs():
+    simulator = SGESSimulator()
+    scenario = create_test_scenario()
+    charging_cost_scenario = replace(
+        scenario,
+        economics=replace(
+            scenario.economics,
+            charging_energy_cost_per_mwh=50.0,
+        ),
+    )
+
+    base_result = simulator.run(scenario)
+    charging_cost_result = simulator.run(charging_cost_scenario)
+
+    assert charging_cost_result.annual_charging_energy_mwh == pytest.approx(
+        charging_cost_result.annual_discharged_energy_mwh
+        / charging_cost_result.effective_round_trip_efficiency
+    )
+    assert charging_cost_result.annual_charging_energy_cost == pytest.approx(
+        charging_cost_result.annual_charging_energy_mwh * 50.0
+    )
+    assert charging_cost_result.annual_lcos_cost == pytest.approx(
+        charging_cost_result.annual_opex
+        + charging_cost_result.annual_charging_energy_cost
+    )
+    assert base_result.lcos_result is not None
+    assert charging_cost_result.lcos_result is not None
+    assert charging_cost_result.lcos_result.lcos_per_mwh > (
+        base_result.lcos_result.lcos_per_mwh
+    )
+
+
 def test_energy_flow_is_explicit_and_consistent():
     simulator = SGESSimulator()
     scenario = create_test_scenario()

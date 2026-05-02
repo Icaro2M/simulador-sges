@@ -37,6 +37,7 @@ const defaultScenario: SimulationRequest = {
   fixed_capex: 100000,
   fixed_annual_opex: 10000,
   variable_opex_per_mwh: 5,
+  charging_energy_cost_per_mwh: 0,
 
   project_lifetime_years: 25,
   discount_rate: 0.08,
@@ -173,6 +174,11 @@ export function DispatchPage() {
 
     if (scenario.discharge_efficiency <= 0 || scenario.discharge_efficiency > 1) {
       setValidationError("A eficiÃªncia de descarga precisa estar entre 0 e 1.");
+      return false;
+    }
+
+    if (scenario.charging_energy_cost_per_mwh < 0) {
+      setValidationError("O custo da energia de carga nao pode ser negativo.");
       return false;
     }
 
@@ -486,6 +492,20 @@ export function DispatchPage() {
                 onChange={(event) =>
                   updateScenarioField(
                     "variable_opex_per_mwh",
+                    Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
+            <Field label="Custo da energia de carga por MWh">
+              <input
+                className={inputClass}
+                type="number"
+                value={scenario.charging_energy_cost_per_mwh}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "charging_energy_cost_per_mwh",
                     Number(event.target.value)
                   )
                 }

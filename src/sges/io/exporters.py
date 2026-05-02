@@ -45,6 +45,9 @@ def simulation_result_to_dict(result: SimulationResult) -> dict:
             "initial_capex": result.initial_capex,
             "annual_opex": result.annual_opex,
             "annual_discharged_energy_mwh": result.annual_discharged_energy_mwh,
+            "annual_charging_energy_mwh": result.annual_charging_energy_mwh,
+            "annual_charging_energy_cost": result.annual_charging_energy_cost,
+            "annual_lcos_cost": result.annual_lcos_cost,
             "lcos_per_mwh": (
                 result.lcos_result.lcos_per_mwh
                 if result.lcos_result is not None
@@ -57,6 +60,26 @@ def simulation_result_to_dict(result: SimulationResult) -> dict:
             ),
             "discounted_energy_mwh": (
                 result.lcos_result.discounted_energy_mwh
+                if result.lcos_result is not None
+                else None
+            ),
+            "discounted_opex": (
+                result.lcos_result.discounted_opex
+                if result.lcos_result is not None
+                else None
+            ),
+            "discounted_charging_energy_cost": (
+                result.lcos_result.discounted_charging_energy_cost
+                if result.lcos_result is not None
+                else None
+            ),
+            "discounted_replacement_cost": (
+                result.lcos_result.discounted_replacement_cost
+                if result.lcos_result is not None
+                else None
+            ),
+            "discounted_end_of_life_cost": (
+                result.lcos_result.discounted_end_of_life_cost
                 if result.lcos_result is not None
                 else None
             ),
@@ -112,9 +135,16 @@ def export_result_to_csv(result: SimulationResult, path: str | Path) -> None:
         ("initial_capex", data["economics"]["initial_capex"]),
         ("annual_opex", data["economics"]["annual_opex"]),
         ("annual_discharged_energy_mwh", data["economics"]["annual_discharged_energy_mwh"]),
+        ("annual_charging_energy_mwh", data["economics"]["annual_charging_energy_mwh"]),
+        ("annual_charging_energy_cost", data["economics"]["annual_charging_energy_cost"]),
+        ("annual_lcos_cost", data["economics"]["annual_lcos_cost"]),
         ("lcos_per_mwh", data["economics"]["lcos_per_mwh"]),
         ("discounted_cost", data["economics"]["discounted_cost"]),
         ("discounted_energy_mwh", data["economics"]["discounted_energy_mwh"]),
+        ("discounted_opex", data["economics"]["discounted_opex"]),
+        ("discounted_charging_energy_cost", data["economics"]["discounted_charging_energy_cost"]),
+        ("discounted_replacement_cost", data["economics"]["discounted_replacement_cost"]),
+        ("discounted_end_of_life_cost", data["economics"]["discounted_end_of_life_cost"]),
     ]
 
     with output_path.open("w", encoding="utf-8", newline="") as file:

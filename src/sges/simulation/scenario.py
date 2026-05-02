@@ -30,6 +30,7 @@ class EconomicScenario:
     project_lifetime_years: int
     discount_rate: float
     cycles_per_year: int
+    charging_energy_cost_per_mwh: float = 0.0
 
 
 @dataclass(frozen=True)

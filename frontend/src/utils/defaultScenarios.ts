@@ -25,6 +25,7 @@ export function createDefaultScenario(
     fixed_capex: 50000,
     fixed_annual_opex: 10000,
     variable_opex_per_mwh: 5,
+    charging_energy_cost_per_mwh: 0,
 
     project_lifetime_years: 20,
     discount_rate: 0.08,

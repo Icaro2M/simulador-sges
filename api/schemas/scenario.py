@@ -25,6 +25,7 @@ class SimulationRequest(BaseModel):
     fixed_capex: float = Field(ge=0)
     fixed_annual_opex: float = Field(ge=0)
     variable_opex_per_mwh: float = Field(ge=0)
+    charging_energy_cost_per_mwh: float = Field(default=0.0, ge=0)
     project_lifetime_years: int = Field(gt=0)
     discount_rate: float = Field(ge=0, lt=1)
     cycles_per_year: int = Field(gt=0)

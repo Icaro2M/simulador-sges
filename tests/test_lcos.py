@@ -38,3 +38,41 @@ def test_lcos_increases_with_cost():
     result2 = calculate_lcos(higher_cost)
 
     assert result2.lcos_per_mwh > result1.lcos_per_mwh
+
+
+def test_lcos_includes_annual_charging_energy_cost():
+    data = LcosInput(
+        initial_capex=100000,
+        annual_opex=10000,
+        annual_charging_energy_cost=2500,
+        annual_discharged_energy_mwh=100,
+        project_lifetime_years=2,
+        discount_rate=0.0,
+    )
+
+    result = calculate_lcos(data)
+
+    assert result.discounted_charging_energy_cost == 5000
+    assert result.discounted_cost == 125000
+    assert result.discounted_energy_mwh == 200
+    assert result.lcos_per_mwh == 625
+
+
+def test_lcos_zero_charging_cost_matches_simplified_case():
+    simplified = LcosInput(
+        initial_capex=100000,
+        annual_opex=10000,
+        annual_discharged_energy_mwh=100,
+        project_lifetime_years=10,
+        discount_rate=0.08,
+    )
+    explicit_zero = LcosInput(
+        initial_capex=100000,
+        annual_opex=10000,
+        annual_charging_energy_cost=0.0,
+        annual_discharged_energy_mwh=100,
+        project_lifetime_years=10,
+        discount_rate=0.08,
+    )
+
+    assert calculate_lcos(explicit_zero) == calculate_lcos(simplified)

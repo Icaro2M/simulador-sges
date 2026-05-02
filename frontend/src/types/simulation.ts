@@ -22,6 +22,7 @@ export interface SimulationRequest {
   fixed_capex: number;
   fixed_annual_opex: number;
   variable_opex_per_mwh: number;
+  charging_energy_cost_per_mwh: number;
 
   project_lifetime_years: number;
   discount_rate: number;
@@ -50,6 +51,10 @@ export interface LcosResult {
   lcos_per_mwh: number;
   discounted_cost: number;
   discounted_energy_mwh: number;
+  discounted_opex: number;
+  discounted_charging_energy_cost: number;
+  discounted_replacement_cost: number;
+  discounted_end_of_life_cost: number;
 }
 
 export interface SimulationResultData {
@@ -72,6 +77,9 @@ export interface SimulationResultData {
   initial_capex: number;
   annual_opex: number;
   annual_discharged_energy_mwh: number;
+  annual_charging_energy_mwh?: number;
+  annual_charging_energy_cost?: number;
+  annual_lcos_cost?: number;
   lcos_result: LcosResult | null;
 }
 
