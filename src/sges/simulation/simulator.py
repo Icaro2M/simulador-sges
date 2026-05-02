@@ -24,11 +24,32 @@ class SGESSimulator:
             loss_model.calculate_standby_loss(hours=standby_hours_per_cycle),
             technology_result.stored_energy_kwh,
         )
-        effective_stored_energy_kwh = (
-            technology_result.stored_energy_kwh - standby_loss_per_cycle_kwh
+        available_energy_kwh = max(
+            technology_result.stored_energy_kwh - standby_loss_per_cycle_kwh,
+            0.0,
         )
-        effective_delivered_energy_kwh = loss_model.apply_cycle_losses(
-            effective_stored_energy_kwh * technology_result.discharge_efficiency
+        gross_delivered_energy_kwh = (
+            available_energy_kwh * technology_result.discharge_efficiency
+        )
+        cycle_loss_breakdown = loss_model.calculate_cycle_loss_breakdown(
+            gross_delivered_energy_kwh
+        )
+        effective_delivered_energy_kwh = cycle_loss_breakdown.output_energy_kwh
+        standby_output_loss_per_cycle_kwh = max(
+            technology_result.technical_delivered_energy_kwh
+            - gross_delivered_energy_kwh,
+            0.0,
+        )
+        fractional_cycle_loss_per_cycle_kwh = cycle_loss_breakdown.fractional_loss_kwh
+        fixed_cycle_loss_per_cycle_kwh = cycle_loss_breakdown.fixed_loss_kwh
+        cycle_loss_per_cycle_kwh = cycle_loss_breakdown.total_loss_kwh
+        total_loss_per_cycle_kwh = (
+            standby_output_loss_per_cycle_kwh + cycle_loss_per_cycle_kwh
+        )
+        effective_round_trip_efficiency = (
+            effective_delivered_energy_kwh / technology_result.input_energy_kwh
+            if technology_result.input_energy_kwh > 0
+            else 0.0
         )
         annual_standby_loss_kwh = (
             standby_loss_per_cycle_kwh * scenario.economics.cycles_per_year
@@ -79,15 +100,24 @@ class SGESSimulator:
                 "As perdas configuradas deixam a energia anual entregavel igual a zero; "
                 "o LCOS fica indefinido. "
                 f"Energia armazenada: {technology_result.stored_energy_kwh:.4f} kWh; "
-                f"energia tecnica entregue: {technology_result.delivered_energy_kwh:.4f} kWh; "
+                f"energia eletrica de saida antes das perdas de ciclo: {gross_delivered_energy_kwh:.4f} kWh; "
                 f"tempo medio em standby por ciclo: {standby_hours_per_cycle:.4f} h; "
-                f"perda em standby por ciclo: {standby_loss_per_cycle_kwh:.4f} kWh."
+                f"perda em standby por ciclo: {standby_loss_per_cycle_kwh:.4f} kWh; "
+                f"perda de ciclo por ciclo: {cycle_loss_per_cycle_kwh:.4f} kWh."
             )
 
         return SimulationResult(
             scenario_name=scenario.name,
             technology_result=technology_result,
+            available_energy_kwh=available_energy_kwh,
+            gross_delivered_energy_kwh=gross_delivered_energy_kwh,
             effective_delivered_energy_kwh=effective_delivered_energy_kwh,
+            standby_output_loss_per_cycle_kwh=standby_output_loss_per_cycle_kwh,
+            fractional_cycle_loss_per_cycle_kwh=fractional_cycle_loss_per_cycle_kwh,
+            fixed_cycle_loss_per_cycle_kwh=fixed_cycle_loss_per_cycle_kwh,
+            cycle_loss_per_cycle_kwh=cycle_loss_per_cycle_kwh,
+            total_loss_per_cycle_kwh=total_loss_per_cycle_kwh,
+            effective_round_trip_efficiency=effective_round_trip_efficiency,
             standby_hours_per_cycle=standby_hours_per_cycle,
             standby_loss_per_cycle_kwh=standby_loss_per_cycle_kwh,
             annual_standby_loss_kwh=annual_standby_loss_kwh,

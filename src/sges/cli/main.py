@@ -214,23 +214,35 @@ def dispatch(
         ),
     )
 
-    total_charged = dispatch_result["charged_kwh"].sum()
-    total_discharged = dispatch_result["discharged_kwh"].sum()
-    total_standby_loss = dispatch_result["standby_loss_kwh"].sum()
-    total_cost = dispatch_result["cost"].sum()
-    total_revenue = dispatch_result["revenue"].sum()
-    net_revenue = dispatch_result["net_revenue"].sum()
+    summary = dispatch_result.attrs.get("summary", {})
 
     table = Table(title="Dispatch Simulation")
     table.add_column("Metric")
     table.add_column("Value")
 
-    table.add_row("Total charged", f"{total_charged:,.2f} kWh")
-    table.add_row("Total discharged", f"{total_discharged:,.2f} kWh")
-    table.add_row("Standby losses", f"{total_standby_loss:,.2f} kWh")
-    table.add_row("Total cost", f"${total_cost:,.2f}")
-    table.add_row("Total revenue", f"${total_revenue:,.2f}")
-    table.add_row("Net revenue", f"${net_revenue:,.2f}")
+    table.add_row(
+        "Total charged from grid",
+        f"{summary.get('total_energy_charged_from_grid_kwh', 0):,.2f} kWh",
+    )
+    table.add_row(
+        "Total stored",
+        f"{summary.get('total_energy_stored_kwh', 0):,.2f} kWh",
+    )
+    table.add_row(
+        "Total delivered",
+        f"{summary.get('total_energy_discharged_to_grid_kwh', 0):,.2f} kWh",
+    )
+    table.add_row(
+        "Standby losses",
+        f"{summary.get('total_standby_loss_kwh', 0):,.2f} kWh",
+    )
+    table.add_row("Total cost", f"${summary.get('total_charge_cost', 0):,.2f}")
+    table.add_row("Total revenue", f"${summary.get('total_revenue', 0):,.2f}")
+    table.add_row("Net profit", f"${summary.get('net_profit', 0):,.2f}")
+    table.add_row("Final SOC", f"{summary.get('final_soc_kwh', 0):,.2f} kWh")
+    table.add_row("Charge hours", str(summary.get("charge_hours", 0)))
+    table.add_row("Discharge hours", str(summary.get("discharge_hours", 0)))
+    table.add_row("Standby hours", str(summary.get("standby_hours", 0)))
 
     console.print(table)
 
@@ -252,19 +264,30 @@ def _print_single_result(result):
     table.add_column("Value")
 
     table.add_row("Technology", result.technology_result.technology_name)
+    table.add_row(
+        "Input energy",
+        f"{result.technology_result.input_energy_kwh:,.2f} kWh",
+    )
+    table.add_row(
+        "Max potential energy",
+        f"{result.technology_result.max_potential_energy_kwh:,.2f} kWh",
+    )
     table.add_row("Stored energy", f"{result.technology_result.stored_energy_kwh:,.2f} kWh")
     table.add_row(
         "Required charge energy",
         f"{result.technology_result.required_charge_energy_kwh:,.2f} kWh",
     )
-    table.add_row("Delivered energy", f"{result.technology_result.delivered_energy_kwh:,.2f} kWh")
+    table.add_row("Technical delivered energy", f"{result.technology_result.delivered_energy_kwh:,.2f} kWh")
+    table.add_row("Available energy", f"{result.available_energy_kwh:,.2f} kWh")
+    table.add_row("Gross delivered energy", f"{result.gross_delivered_energy_kwh:,.2f} kWh")
     table.add_row("Effective delivered energy", f"{result.effective_delivered_energy_kwh:,.2f} kWh")
     table.add_row("Charge efficiency", f"{result.technology_result.charge_efficiency:.2%}")
     table.add_row(
         "Discharge efficiency",
         f"{result.technology_result.discharge_efficiency:.2%}",
     )
-    table.add_row("Round-trip efficiency", f"{result.technology_result.round_trip_efficiency:.2%}")
+    table.add_row("Technical round-trip efficiency", f"{result.technology_result.round_trip_efficiency:.2%}")
+    table.add_row("Effective round-trip efficiency", f"{result.effective_round_trip_efficiency:.2%}")
     table.add_row("Nominal power", f"{result.technology_result.nominal_power_kw:,.2f} kW")
     table.add_row("Charge power", f"{result.technology_result.charge_power_kw:,.2f} kW")
     table.add_row("Discharge power", f"{result.technology_result.discharge_power_kw:,.2f} kW")
@@ -272,6 +295,11 @@ def _print_single_result(result):
     table.add_row("Discharge time", f"{result.technology_result.discharge_time_h:,.2f} h")
     table.add_row("Standby time per cycle", f"{result.standby_hours_per_cycle:,.2f} h")
     table.add_row("Standby loss per cycle", f"{result.standby_loss_per_cycle_kwh:,.2f} kWh")
+    table.add_row("Standby output loss per cycle", f"{result.standby_output_loss_per_cycle_kwh:,.2f} kWh")
+    table.add_row("Fractional cycle loss", f"{result.fractional_cycle_loss_per_cycle_kwh:,.2f} kWh")
+    table.add_row("Fixed cycle loss", f"{result.fixed_cycle_loss_per_cycle_kwh:,.2f} kWh")
+    table.add_row("Cycle loss per cycle", f"{result.cycle_loss_per_cycle_kwh:,.2f} kWh")
+    table.add_row("Total loss per cycle", f"{result.total_loss_per_cycle_kwh:,.2f} kWh")
     table.add_row("Annual standby loss", f"{result.annual_standby_loss_kwh:,.2f} kWh")
     table.add_row("Status", result.status)
     if result.warnings:

@@ -14,7 +14,7 @@ class DispatchService:
     def __init__(self):
         self.scenario_service = ScenarioService()
 
-    def run_dispatch(self, request: DispatchRequest) -> list[dict]:
+    def run_dispatch(self, request: DispatchRequest) -> dict:
         scenario = self.scenario_service.build_scenario(request.scenario)
 
         simulator = SGESSimulator()
@@ -39,4 +39,7 @@ class DispatchService:
             ),
         )
 
-        return dispatch_result.to_dict(orient="records")
+        return {
+            "results": dispatch_result.to_dict(orient="records"),
+            "summary": dispatch_result.attrs.get("summary", {}),
+        }

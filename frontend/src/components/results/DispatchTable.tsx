@@ -27,7 +27,7 @@ export function DispatchTable({ data }: Props) {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[980px] border-collapse text-left text-sm">
+        <table className="w-full min-w-[1320px] border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-white">
               <th className="px-6 py-3 font-semibold text-slate-500">Hora</th>
@@ -37,9 +37,20 @@ export function DispatchTable({ data }: Props) {
                 Carga kWh
               </th>
               <th className="px-6 py-3 font-semibold text-slate-500">
-                Descarga kWh
+                Armazenada kWh
               </th>
-              <th className="px-6 py-3 font-semibold text-slate-500">SOC kWh</th>
+              <th className="px-6 py-3 font-semibold text-slate-500">
+                Entregue kWh
+              </th>
+              <th className="px-6 py-3 font-semibold text-slate-500">
+                Perda standby kWh
+              </th>
+              <th className="px-6 py-3 font-semibold text-slate-500">
+                SOC inicial kWh
+              </th>
+              <th className="px-6 py-3 font-semibold text-slate-500">
+                SOC final kWh
+              </th>
               <th className="px-6 py-3 font-semibold text-slate-500">Receita</th>
               <th className="px-6 py-3 font-semibold text-slate-500">Custo</th>
               <th className="px-6 py-3 font-semibold text-slate-500">
@@ -60,10 +71,19 @@ export function DispatchTable({ data }: Props) {
                   {formatNumber(item.charged_energy_kwh)}
                 </td>
                 <td className="px-6 py-4 text-slate-950">
+                  {formatNumber(item.stored_energy_kwh)}
+                </td>
+                <td className="px-6 py-4 text-slate-950">
                   {formatNumber(item.discharged_energy_kwh)}
                 </td>
                 <td className="px-6 py-4 text-slate-950">
-                  {formatNumber(item.soc_kwh)}
+                  {formatNumber(item.standby_loss_kwh)}
+                </td>
+                <td className="px-6 py-4 text-slate-950">
+                  {formatNumber(item.soc_initial_kwh)}
+                </td>
+                <td className="px-6 py-4 text-slate-950">
+                  {formatNumber(item.soc_final_kwh)}
                 </td>
                 <td className="px-6 py-4 text-slate-950">
                   {formatNumber(item.revenue)}

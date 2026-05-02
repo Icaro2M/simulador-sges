@@ -29,32 +29,30 @@ class ShaftSGES(GravityStorageTechnology):
             )
         )
 
-        round_trip_efficiency = calculate_round_trip_efficiency(
+        technical_round_trip_efficiency = calculate_round_trip_efficiency(
             EfficiencyChain(
                 charge_efficiency=self.charge_efficiency,
                 discharge_efficiency=self.discharge_efficiency,
             )
         )
 
-        required_charge_energy_kwh = energy.energy_kwh / self.charge_efficiency
-        delivered_energy_kwh = energy.energy_kwh * self.discharge_efficiency
-        delivered_energy_kwh = self.loss_model.apply_cycle_losses(delivered_energy_kwh)
+        input_energy_kwh = energy.energy_kwh / self.charge_efficiency
+        technical_delivered_energy_kwh = energy.energy_kwh * self.discharge_efficiency
 
-        effective_round_trip_efficiency = (
-            delivered_energy_kwh / required_charge_energy_kwh
-        )
-
-        charge_time_h = required_charge_energy_kwh / charge_power_kw
-        discharge_time_h = delivered_energy_kwh / discharge_power_kw
+        charge_time_h = input_energy_kwh / charge_power_kw
+        discharge_time_h = technical_delivered_energy_kwh / discharge_power_kw
 
         return TechnologyResult(
             technology_name="Shaft SGES",
+            max_potential_energy_kwh=energy.energy_kwh,
+            input_energy_kwh=input_energy_kwh,
             stored_energy_kwh=energy.energy_kwh,
-            required_charge_energy_kwh=required_charge_energy_kwh,
-            delivered_energy_kwh=delivered_energy_kwh,
+            required_charge_energy_kwh=input_energy_kwh,
+            technical_delivered_energy_kwh=technical_delivered_energy_kwh,
+            delivered_energy_kwh=technical_delivered_energy_kwh,
             charge_efficiency=self.charge_efficiency,
             discharge_efficiency=self.discharge_efficiency,
-            round_trip_efficiency=effective_round_trip_efficiency,
+            round_trip_efficiency=technical_round_trip_efficiency,
             nominal_power_kw=nominal_power_kw,
             charge_power_kw=charge_power_kw,
             discharge_power_kw=discharge_power_kw,

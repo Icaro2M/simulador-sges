@@ -4,6 +4,15 @@ from sges.core.exceptions import InvalidParameterError
 
 
 @dataclass(frozen=True)
+class CycleLossBreakdown:
+    input_energy_kwh: float
+    fractional_loss_kwh: float
+    fixed_loss_kwh: float
+    output_energy_kwh: float
+    total_loss_kwh: float
+
+
+@dataclass(frozen=True)
 class LossModel:
     cycle_loss_fraction: float = 0.0
     fixed_cycle_loss_kwh: float = 0.0
@@ -20,15 +29,26 @@ class LossModel:
             raise InvalidParameterError("standby_loss_kwh_per_hour must be greater than or equal to zero")
 
     def apply_cycle_losses(self, energy_kwh: float) -> float:
+        return self.calculate_cycle_loss_breakdown(energy_kwh).output_energy_kwh
+
+    def calculate_cycle_loss_breakdown(self, energy_kwh: float) -> CycleLossBreakdown:
         self.validate()
 
         if energy_kwh < 0:
             raise InvalidParameterError("energy_kwh must be greater than or equal to zero")
 
-        after_fraction_loss = energy_kwh * (1 - self.cycle_loss_fraction)
-        after_fixed_loss = max(after_fraction_loss - self.fixed_cycle_loss_kwh, 0.0)
+        fractional_loss_kwh = energy_kwh * self.cycle_loss_fraction
+        after_fraction_loss = energy_kwh - fractional_loss_kwh
+        fixed_loss_kwh = min(self.fixed_cycle_loss_kwh, after_fraction_loss)
+        output_energy_kwh = after_fraction_loss - fixed_loss_kwh
 
-        return after_fixed_loss
+        return CycleLossBreakdown(
+            input_energy_kwh=energy_kwh,
+            fractional_loss_kwh=fractional_loss_kwh,
+            fixed_loss_kwh=fixed_loss_kwh,
+            output_energy_kwh=output_energy_kwh,
+            total_loss_kwh=fractional_loss_kwh + fixed_loss_kwh,
+        )
 
     def calculate_standby_loss(self, hours: float) -> float:
         self.validate()

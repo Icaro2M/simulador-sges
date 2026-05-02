@@ -39,6 +39,32 @@ export function SimulationResult({ response }: SimulationResultProps) {
   const lcos = result.lcos_result;
   const chargePowerKw = technology.charge_power_kw ?? technology.nominal_power_kw;
   const dischargePowerKw = technology.discharge_power_kw ?? technology.nominal_power_kw;
+  const maxPotentialEnergyKwh =
+    technology.max_potential_energy_kwh ?? technology.stored_energy_kwh;
+  const inputEnergyKwh =
+    technology.input_energy_kwh ?? technology.required_charge_energy_kwh;
+  const technicalDeliveredEnergyKwh =
+    technology.technical_delivered_energy_kwh ?? technology.delivered_energy_kwh;
+  const availableEnergyKwh =
+    result.available_energy_kwh ??
+    Math.max(technology.stored_energy_kwh - result.standby_loss_per_cycle_kwh, 0);
+  const grossDeliveredEnergyKwh =
+    result.gross_delivered_energy_kwh ??
+    availableEnergyKwh * technology.discharge_efficiency;
+  const standbyOutputLossPerCycleKwh =
+    result.standby_output_loss_per_cycle_kwh ??
+    Math.max(technicalDeliveredEnergyKwh - grossDeliveredEnergyKwh, 0);
+  const fractionalCycleLossPerCycleKwh =
+    result.fractional_cycle_loss_per_cycle_kwh ?? 0;
+  const fixedCycleLossPerCycleKwh =
+    result.fixed_cycle_loss_per_cycle_kwh ?? 0;
+  const cycleLossPerCycleKwh =
+    result.cycle_loss_per_cycle_kwh ??
+    Math.max(grossDeliveredEnergyKwh - result.effective_delivered_energy_kwh, 0);
+  const totalLossPerCycleKwh =
+    standbyOutputLossPerCycleKwh + cycleLossPerCycleKwh;
+  const effectiveRoundTripEfficiency =
+    result.effective_round_trip_efficiency ?? technology.round_trip_efficiency;
 
   const technicalRows = [
     {
@@ -46,18 +72,33 @@ export function SimulationResult({ response }: SimulationResultProps) {
       value: technology.technology_name,
     },
     {
+      label: "Energia potencial máxima",
+      value: formatNumber(maxPotentialEnergyKwh),
+      unit: "kWh",
+    },
+    {
+      label: "Energia elétrica de entrada",
+      value: formatNumber(inputEnergyKwh),
+      unit: "kWh",
+    },
+    {
       label: "Energia armazenada",
       value: formatNumber(technology.stored_energy_kwh),
       unit: "kWh",
     },
     {
-      label: "Energia requerida na carga",
-      value: formatNumber(technology.required_charge_energy_kwh),
+      label: "Energia disponível após standby",
+      value: formatNumber(availableEnergyKwh),
       unit: "kWh",
     },
     {
-      label: "Energia entregue",
-      value: formatNumber(technology.delivered_energy_kwh),
+      label: "Energia elétrica antes das perdas",
+      value: formatNumber(grossDeliveredEnergyKwh),
+      unit: "kWh",
+    },
+    {
+      label: "Energia técnica entregue",
+      value: formatNumber(technicalDeliveredEnergyKwh),
       unit: "kWh",
     },
     {
@@ -74,8 +115,12 @@ export function SimulationResult({ response }: SimulationResultProps) {
       value: formatPercent(technology.discharge_efficiency),
     },
     {
-      label: "Eficiência round-trip",
+      label: "Eficiência round-trip técnica",
       value: formatPercent(technology.round_trip_efficiency),
+    },
+    {
+      label: "Eficiência efetiva do ciclo",
+      value: formatPercent(effectiveRoundTripEfficiency),
     },
     {
       label: "Potência nominal",
@@ -110,6 +155,31 @@ export function SimulationResult({ response }: SimulationResultProps) {
     {
       label: "Perda standby por ciclo",
       value: formatNumber(result.standby_loss_per_cycle_kwh),
+      unit: "kWh",
+    },
+    {
+      label: "Perda standby equivalente na saída",
+      value: formatNumber(standbyOutputLossPerCycleKwh),
+      unit: "kWh",
+    },
+    {
+      label: "Perda fracionária de ciclo",
+      value: formatNumber(fractionalCycleLossPerCycleKwh),
+      unit: "kWh",
+    },
+    {
+      label: "Perda fixa de ciclo aplicada",
+      value: formatNumber(fixedCycleLossPerCycleKwh),
+      unit: "kWh",
+    },
+    {
+      label: "Perda de ciclo por ciclo",
+      value: formatNumber(cycleLossPerCycleKwh),
+      unit: "kWh",
+    },
+    {
+      label: "Perdas totais por ciclo",
+      value: formatNumber(totalLossPerCycleKwh),
       unit: "kWh",
     },
   ];
@@ -167,8 +237,8 @@ export function SimulationResult({ response }: SimulationResultProps) {
         />
 
         <SummaryMetric
-          title="Eficiência round-trip"
-          value={formatPercent(technology.round_trip_efficiency)}
+          title="Eficiência efetiva"
+          value={formatPercent(effectiveRoundTripEfficiency)}
         />
 
         <SummaryMetric

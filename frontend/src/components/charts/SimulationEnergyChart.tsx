@@ -20,12 +20,20 @@ export function SimulationEnergyChart({ data }: Props) {
 
   const chartData = [
     {
-      name: "Armazenada",
-      energy: technology.stored_energy_kwh,
+      name: "Entrada",
+      energy: technology.input_energy_kwh ?? technology.required_charge_energy_kwh,
     },
     {
-      name: "Tecnica",
-      energy: technology.delivered_energy_kwh,
+      name: "Potencial",
+      energy: technology.max_potential_energy_kwh ?? technology.stored_energy_kwh,
+    },
+    {
+      name: "Disponivel",
+      energy: data.available_energy_kwh ?? technology.stored_energy_kwh,
+    },
+    {
+      name: "Antes perdas",
+      energy: data.gross_delivered_energy_kwh ?? technology.delivered_energy_kwh,
     },
     {
       name: "Efetiva",
@@ -37,10 +45,10 @@ export function SimulationEnergyChart({ data }: Props) {
     <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
       <div className="mb-5">
         <h3 className="text-base font-semibold text-slate-950">
-          Energia armazenada, tecnica e efetiva
+          Fluxo energético operacional
         </h3>
         <p className="mt-1 text-sm text-slate-500">
-          Compara energia potencial, entrega tecnica por ciclo e entrega apos standby.
+          Compara entrada elétrica, potencial armazenado, perdas e entrega efetiva.
         </p>
       </div>
 

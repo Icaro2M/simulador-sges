@@ -16,11 +16,12 @@ dispatch_service = DispatchService()
 @router.post("", response_model=DispatchResponse)
 def dispatch(request: DispatchRequest):
     try:
-        results = dispatch_service.run_dispatch(request)
+        dispatch_result = dispatch_service.run_dispatch(request)
 
         return DispatchResponse(
             success=True,
-            results=results,
+            results=dispatch_result["results"],
+            summary=dispatch_result["summary"],
         )
 
     except InvalidParameterError as error:

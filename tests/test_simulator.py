@@ -104,6 +104,67 @@ def test_charge_and_discharge_power_limits_affect_only_their_cycle_times():
     )
 
 
+def test_energy_flow_is_explicit_and_consistent():
+    simulator = SGESSimulator()
+    scenario = create_test_scenario()
+
+    result = simulator.run(scenario)
+    technology = result.technology_result
+
+    assert technology.max_potential_energy_kwh == pytest.approx(
+        technology.stored_energy_kwh
+    )
+    assert technology.input_energy_kwh == pytest.approx(
+        technology.max_potential_energy_kwh / technology.charge_efficiency
+    )
+    assert result.available_energy_kwh == pytest.approx(
+        max(technology.stored_energy_kwh - result.standby_loss_per_cycle_kwh, 0)
+    )
+    assert result.gross_delivered_energy_kwh == pytest.approx(
+        result.available_energy_kwh * technology.discharge_efficiency
+    )
+    assert result.cycle_loss_per_cycle_kwh == pytest.approx(
+        result.gross_delivered_energy_kwh - result.effective_delivered_energy_kwh
+    )
+    assert result.standby_output_loss_per_cycle_kwh == pytest.approx(
+        technology.technical_delivered_energy_kwh - result.gross_delivered_energy_kwh
+    )
+    assert result.total_loss_per_cycle_kwh == pytest.approx(
+        result.standby_output_loss_per_cycle_kwh + result.cycle_loss_per_cycle_kwh
+    )
+    assert result.total_loss_per_cycle_kwh == pytest.approx(
+        technology.technical_delivered_energy_kwh - result.effective_delivered_energy_kwh
+    )
+    assert result.effective_round_trip_efficiency == pytest.approx(
+        result.effective_delivered_energy_kwh / technology.input_energy_kwh
+    )
+
+
+def test_cycle_loss_breakdown_separates_fractional_and_fixed_losses():
+    simulator = SGESSimulator()
+    scenario = create_test_scenario()
+    loss_scenario = replace(
+        scenario,
+        losses=replace(
+            scenario.losses,
+            cycle_loss_fraction=0.10,
+            fixed_cycle_loss_kwh=0.25,
+            standby_loss_kwh_per_hour=0.0,
+        ),
+    )
+
+    result = simulator.run(loss_scenario)
+
+    assert result.fractional_cycle_loss_per_cycle_kwh == pytest.approx(
+        result.gross_delivered_energy_kwh * 0.10
+    )
+    assert result.fixed_cycle_loss_per_cycle_kwh == pytest.approx(0.25)
+    assert result.cycle_loss_per_cycle_kwh == pytest.approx(
+        result.fractional_cycle_loss_per_cycle_kwh
+        + result.fixed_cycle_loss_per_cycle_kwh
+    )
+
+
 def test_standby_loss_reduces_annual_energy_but_not_technical_energy():
     simulator = SGESSimulator()
     standby_scenario = create_test_scenario()

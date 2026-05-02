@@ -8,7 +8,15 @@ from sges.economics.lcos import LcosResult
 class SimulationResult:
     scenario_name: str
     technology_result: TechnologyResult
+    available_energy_kwh: float
+    gross_delivered_energy_kwh: float
     effective_delivered_energy_kwh: float
+    standby_output_loss_per_cycle_kwh: float
+    fractional_cycle_loss_per_cycle_kwh: float
+    fixed_cycle_loss_per_cycle_kwh: float
+    cycle_loss_per_cycle_kwh: float
+    total_loss_per_cycle_kwh: float
+    effective_round_trip_efficiency: float
     standby_hours_per_cycle: float
     standby_loss_per_cycle_kwh: float
     annual_standby_loss_kwh: float

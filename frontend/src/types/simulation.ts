@@ -30,8 +30,11 @@ export interface SimulationRequest {
 
 export interface TechnologySimulationResult {
   technology_name: string;
+  max_potential_energy_kwh: number;
+  input_energy_kwh: number;
   stored_energy_kwh: number;
   required_charge_energy_kwh: number;
+  technical_delivered_energy_kwh: number;
   delivered_energy_kwh: number;
   charge_efficiency: number;
   discharge_efficiency: number;
@@ -52,7 +55,15 @@ export interface LcosResult {
 export interface SimulationResultData {
   scenario_name: string;
   technology_result: TechnologySimulationResult;
+  available_energy_kwh: number;
+  gross_delivered_energy_kwh: number;
   effective_delivered_energy_kwh: number;
+  standby_output_loss_per_cycle_kwh: number;
+  fractional_cycle_loss_per_cycle_kwh: number;
+  fixed_cycle_loss_per_cycle_kwh: number;
+  cycle_loss_per_cycle_kwh: number;
+  total_loss_per_cycle_kwh: number;
+  effective_round_trip_efficiency: number;
   standby_hours_per_cycle: number;
   standby_loss_per_cycle_kwh: number;
   annual_standby_loss_kwh: number;

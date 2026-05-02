@@ -5,8 +5,11 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class TechnologyResult:
     technology_name: str
+    max_potential_energy_kwh: float
+    input_energy_kwh: float
     stored_energy_kwh: float
     required_charge_energy_kwh: float
+    technical_delivered_energy_kwh: float
     delivered_energy_kwh: float
     charge_efficiency: float
     discharge_efficiency: float
