@@ -15,9 +15,11 @@ class ScenarioService:
                 type=request.technology_type,
                 mass_kg=request.mass_kg,
                 height_m=request.height_m,
-                nominal_power_kw=request.nominal_power_kw,
                 charge_efficiency=request.charge_efficiency,
                 discharge_efficiency=request.discharge_efficiency,
+                nominal_power_kw=request.nominal_power_kw,
+                charge_power_kw=request.charge_power_kw,
+                discharge_power_kw=request.discharge_power_kw,
             ),
             losses=LossScenario(
                 cycle_loss_fraction=request.cycle_loss_fraction,

@@ -266,6 +266,33 @@ export function MonteCarloPage() {
               />
             </Field>
 
+            <Field label="Potência de carga (kW)">
+              <input
+                className={controlClass}
+                type="number"
+                step="any"
+                value={baseScenario.charge_power_kw}
+                onChange={(event) =>
+                  updateBaseScenario("charge_power_kw", Number(event.target.value))
+                }
+              />
+            </Field>
+
+            <Field label="Potência de descarga (kW)">
+              <input
+                className={controlClass}
+                type="number"
+                step="any"
+                value={baseScenario.discharge_power_kw}
+                onChange={(event) =>
+                  updateBaseScenario(
+                    "discharge_power_kw",
+                    Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
             <Field label="Custo por kW">
               <input
                 className={controlClass}

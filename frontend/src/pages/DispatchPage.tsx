@@ -22,6 +22,8 @@ const defaultScenario: SimulationRequest = {
   mass_kg: 100000,
   height_m: 100,
   nominal_power_kw: 500,
+  charge_power_kw: 500,
+  discharge_power_kw: 500,
 
   charge_efficiency: 0.9,
   discharge_efficiency: 0.9,
@@ -154,8 +156,13 @@ export function DispatchPage() {
       return false;
     }
 
-    if (scenario.nominal_power_kw <= 0) {
-      setValidationError("A potência nominal precisa ser maior que zero.");
+    if (scenario.charge_power_kw <= 0) {
+      setValidationError("A potência de carga precisa ser maior que zero.");
+      return false;
+    }
+
+    if (scenario.discharge_power_kw <= 0) {
+      setValidationError("A potência de descarga precisa ser maior que zero.");
       return false;
     }
 
@@ -310,6 +317,34 @@ export function DispatchPage() {
                 onChange={(event) =>
                   updateScenarioField(
                     "nominal_power_kw",
+                    Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
+            <Field label="Potência de carga kW">
+              <input
+                className={inputClass}
+                type="number"
+                value={scenario.charge_power_kw}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "charge_power_kw",
+                    Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
+            <Field label="Potência de descarga kW">
+              <input
+                className={inputClass}
+                type="number"
+                value={scenario.discharge_power_kw}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "discharge_power_kw",
                     Number(event.target.value)
                   )
                 }

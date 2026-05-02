@@ -19,6 +19,8 @@ class ComparisonResultItem(BaseModel):
     discharge_efficiency: float
     round_trip_efficiency: float
     nominal_power_kw: float
+    charge_power_kw: float
+    discharge_power_kw: float
     initial_capex: float
     annual_opex: float
     annual_discharged_energy_mwh: float

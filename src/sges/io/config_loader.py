@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, ValidationError, model_validator
 
 from sges.simulation.scenario import (
     EconomicScenario,
@@ -15,9 +15,29 @@ class TechnologyConfig(BaseModel):
     type: str
     mass_kg: float = Field(gt=0)
     height_m: float = Field(gt=0)
-    nominal_power_kw: float = Field(gt=0)
+    nominal_power_kw: float | None = Field(default=None, gt=0)
+    charge_power_kw: float | None = Field(default=None, gt=0)
+    discharge_power_kw: float | None = Field(default=None, gt=0)
     charge_efficiency: float = Field(gt=0, le=1)
     discharge_efficiency: float = Field(gt=0, le=1)
+
+    @model_validator(mode="after")
+    def fill_power_limits(self):
+        if self.charge_power_kw is None:
+            self.charge_power_kw = self.nominal_power_kw
+
+        if self.discharge_power_kw is None:
+            self.discharge_power_kw = self.nominal_power_kw
+
+        if self.charge_power_kw is None or self.discharge_power_kw is None:
+            raise ValueError(
+                "provide nominal_power_kw or both charge_power_kw and discharge_power_kw"
+            )
+
+        if self.nominal_power_kw is None:
+            self.nominal_power_kw = max(self.charge_power_kw, self.discharge_power_kw)
+
+        return self
 
 
 class LossConfig(BaseModel):
@@ -64,9 +84,11 @@ def load_scenario_from_yaml(path: str | Path) -> Scenario:
             type=config.technology.type,
             mass_kg=config.technology.mass_kg,
             height_m=config.technology.height_m,
-            nominal_power_kw=config.technology.nominal_power_kw,
             charge_efficiency=config.technology.charge_efficiency,
             discharge_efficiency=config.technology.discharge_efficiency,
+            nominal_power_kw=config.technology.nominal_power_kw,
+            charge_power_kw=config.technology.charge_power_kw,
+            discharge_power_kw=config.technology.discharge_power_kw,
         ),
         losses=LossScenario(
             cycle_loss_fraction=config.losses.cycle_loss_fraction,

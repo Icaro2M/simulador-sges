@@ -142,6 +142,8 @@ def monte_carlo(
     parameter_ranges = {
         "technology.height_m": (50, 500),
         "technology.mass_kg": (300_000, 1_500_000),
+        "technology.charge_power_kw": (300, 2500),
+        "technology.discharge_power_kw": (300, 2500),
         "technology.charge_efficiency": (0.85, 0.95),
         "technology.discharge_efficiency": (0.85, 0.95),
         "economics.cost_per_kw": (700, 1800),
@@ -264,6 +266,8 @@ def _print_single_result(result):
     )
     table.add_row("Round-trip efficiency", f"{result.technology_result.round_trip_efficiency:.2%}")
     table.add_row("Nominal power", f"{result.technology_result.nominal_power_kw:,.2f} kW")
+    table.add_row("Charge power", f"{result.technology_result.charge_power_kw:,.2f} kW")
+    table.add_row("Discharge power", f"{result.technology_result.discharge_power_kw:,.2f} kW")
     table.add_row("Charge time", f"{result.technology_result.charge_time_h:,.2f} h")
     table.add_row("Discharge time", f"{result.technology_result.discharge_time_h:,.2f} h")
     table.add_row("Standby time per cycle", f"{result.standby_hours_per_cycle:,.2f} h")
@@ -305,6 +309,8 @@ def _export_comparison_csv(rows, output: Path):
                 "discharge_efficiency",
                 "round_trip_efficiency",
                 "nominal_power_kw",
+                "charge_power_kw",
+                "discharge_power_kw",
                 "initial_capex",
                 "annual_opex",
                 "annual_discharged_energy_mwh",
@@ -325,6 +331,8 @@ def _export_comparison_csv(rows, output: Path):
                     row.discharge_efficiency,
                     row.round_trip_efficiency,
                     row.nominal_power_kw,
+                    row.charge_power_kw,
+                    row.discharge_power_kw,
                     row.initial_capex,
                     row.annual_opex,
                     row.annual_discharged_energy_mwh,

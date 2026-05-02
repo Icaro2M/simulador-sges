@@ -37,6 +37,8 @@ export function SimulationResult({ response }: SimulationResultProps) {
   const result = response.result;
   const technology = result.technology_result;
   const lcos = result.lcos_result;
+  const chargePowerKw = technology.charge_power_kw ?? technology.nominal_power_kw;
+  const dischargePowerKw = technology.discharge_power_kw ?? technology.nominal_power_kw;
 
   const technicalRows = [
     {
@@ -78,6 +80,16 @@ export function SimulationResult({ response }: SimulationResultProps) {
     {
       label: "Potência nominal",
       value: formatNumber(technology.nominal_power_kw),
+      unit: "kW",
+    },
+    {
+      label: "Potência de carga",
+      value: formatNumber(chargePowerKw),
+      unit: "kW",
+    },
+    {
+      label: "Potência de descarga",
+      value: formatNumber(dischargePowerKw),
       unit: "kW",
     },
     {

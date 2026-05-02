@@ -114,9 +114,11 @@ class SGESSimulator:
             return TowerSGES(
                 mass_kg=technology.mass_kg,
                 height_m=technology.height_m,
-                nominal_power_kw=technology.nominal_power_kw,
                 charge_efficiency=technology.charge_efficiency,
                 discharge_efficiency=technology.discharge_efficiency,
+                nominal_power_kw=technology.nominal_power_kw,
+                charge_power_kw=technology.charge_power_kw,
+                discharge_power_kw=technology.discharge_power_kw,
                 loss_model=loss_model,
             )
 
@@ -124,9 +126,11 @@ class SGESSimulator:
             return ShaftSGES(
                 mass_kg=technology.mass_kg,
                 depth_m=technology.height_m,
-                nominal_power_kw=technology.nominal_power_kw,
                 charge_efficiency=technology.charge_efficiency,
                 discharge_efficiency=technology.discharge_efficiency,
+                nominal_power_kw=technology.nominal_power_kw,
+                charge_power_kw=technology.charge_power_kw,
+                discharge_power_kw=technology.discharge_power_kw,
                 loss_model=loss_model,
             )
 

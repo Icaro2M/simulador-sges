@@ -113,7 +113,7 @@ export function ComparisonScenarioForm({
           title="Parâmetros físicos"
           description="Base física para energia armazenada e potência."
         >
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <label className="grid gap-2 text-sm font-semibold text-slate-700">
               Massa (kg)
               <input
@@ -147,6 +147,32 @@ export function ComparisonScenarioForm({
                 })}
               />
               <FieldError message={errors?.nominal_power_kw?.message} />
+            </label>
+
+            <label className="grid gap-2 text-sm font-semibold text-slate-700">
+              Potência de carga (kW)
+              <input
+                className={controlClass}
+                type="number"
+                step="any"
+                {...register(`${fieldPrefix}.charge_power_kw`, {
+                  valueAsNumber: true,
+                })}
+              />
+              <FieldError message={errors?.charge_power_kw?.message} />
+            </label>
+
+            <label className="grid gap-2 text-sm font-semibold text-slate-700">
+              Potência de descarga (kW)
+              <input
+                className={controlClass}
+                type="number"
+                step="any"
+                {...register(`${fieldPrefix}.discharge_power_kw`, {
+                  valueAsNumber: true,
+                })}
+              />
+              <FieldError message={errors?.discharge_power_kw?.message} />
             </label>
           </div>
         </FormGroup>

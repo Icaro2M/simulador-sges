@@ -12,6 +12,18 @@ export const monteCarloParameterOptions = [
     defaultMax: 20000,
   },
   {
+    path: "technology.charge_power_kw",
+    label: "Potência de carga (kW)",
+    defaultMin: 250,
+    defaultMax: 1000,
+  },
+  {
+    path: "technology.discharge_power_kw",
+    label: "Potência de descarga (kW)",
+    defaultMin: 250,
+    defaultMax: 1000,
+  },
+  {
     path: "technology.charge_efficiency",
     label: "EficiÃªncia de carga",
     defaultMin: 0.85,

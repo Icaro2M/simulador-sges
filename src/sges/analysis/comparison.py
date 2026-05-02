@@ -14,6 +14,8 @@ class ComparisonRow:
     discharge_efficiency: float
     round_trip_efficiency: float
     nominal_power_kw: float
+    charge_power_kw: float
+    discharge_power_kw: float
     initial_capex: float
     annual_opex: float
     annual_discharged_energy_mwh: float
@@ -37,6 +39,8 @@ def build_comparison_table(results: list[SimulationResult]) -> list[ComparisonRo
                 discharge_efficiency=result.technology_result.discharge_efficiency,
                 round_trip_efficiency=result.technology_result.round_trip_efficiency,
                 nominal_power_kw=result.technology_result.nominal_power_kw,
+                charge_power_kw=result.technology_result.charge_power_kw,
+                discharge_power_kw=result.technology_result.discharge_power_kw,
                 initial_capex=result.initial_capex,
                 annual_opex=result.annual_opex,
                 annual_discharged_energy_mwh=result.annual_discharged_energy_mwh,

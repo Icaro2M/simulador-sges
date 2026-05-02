@@ -6,9 +6,11 @@ class TechnologyScenario:
     type: str
     mass_kg: float
     height_m: float
-    nominal_power_kw: float
     charge_efficiency: float
     discharge_efficiency: float
+    nominal_power_kw: float | None = None
+    charge_power_kw: float | None = None
+    discharge_power_kw: float | None = None
 
 
 @dataclass(frozen=True)

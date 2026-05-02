@@ -5,6 +5,8 @@ technology:
   mass_kg: 2000000
   height_m: 300
   nominal_power_kw: 2000
+  charge_power_kw: 2000
+  discharge_power_kw: 2000
   charge_efficiency: 0.8556
   discharge_efficiency: 0.9114
 

@@ -12,6 +12,8 @@ class TechnologyResult:
     discharge_efficiency: float
     round_trip_efficiency: float
     nominal_power_kw: float
+    charge_power_kw: float
+    discharge_power_kw: float
     charge_time_h: float
     discharge_time_h: float
 

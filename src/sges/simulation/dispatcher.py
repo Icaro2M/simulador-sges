@@ -21,7 +21,8 @@ def run_price_arbitrage_dispatch(
 ) -> pd.DataFrame:
     capacity_kwh = simulation_result.technology_result.stored_energy_kwh
     delivered_capacity_kwh = simulation_result.technology_result.delivered_energy_kwh
-    power_kw = simulation_result.technology_result.nominal_power_kw
+    charge_power_kw = simulation_result.technology_result.charge_power_kw
+    discharge_power_kw = simulation_result.technology_result.discharge_power_kw
     charge_efficiency = simulation_result.technology_result.charge_efficiency
     discharge_efficiency = simulation_result.technology_result.discharge_efficiency
 
@@ -49,14 +50,14 @@ def run_price_arbitrage_dispatch(
 
         if price <= config.low_price_threshold and soc_kwh < capacity_kwh:
             action = "charge"
-            charged_kwh = min(power_kw, (capacity_kwh - soc_kwh) / charge_efficiency)
+            charged_kwh = min(charge_power_kw, (capacity_kwh - soc_kwh) / charge_efficiency)
             soc_kwh += charged_kwh * charge_efficiency
             cost = (charged_kwh / 1000) * price
 
         elif price >= config.high_price_threshold and soc_kwh > 0:
             action = "discharge"
             raw_delivered_kwh = min(
-                power_kw,
+                discharge_power_kw,
                 soc_kwh * discharge_efficiency,
             )
             discharged_kwh = min(

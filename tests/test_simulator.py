@@ -1,5 +1,6 @@
 from dataclasses import replace
 
+import pytest
 from fastapi.testclient import TestClient
 
 from api.main import app
@@ -61,6 +62,46 @@ def test_simulator_energy_positive():
     result = simulator.run(scenario)
 
     assert result.technology_result.delivered_energy_kwh > 0
+
+
+def test_nominal_power_is_used_as_legacy_power_limit():
+    simulator = SGESSimulator()
+    scenario = create_test_scenario()
+
+    result = simulator.run(scenario)
+
+    assert result.technology_result.nominal_power_kw == 100
+    assert result.technology_result.charge_power_kw == 100
+    assert result.technology_result.discharge_power_kw == 100
+
+
+def test_charge_and_discharge_power_limits_affect_only_their_cycle_times():
+    simulator = SGESSimulator()
+    scenario = create_test_scenario()
+    split_power_scenario = replace(
+        scenario,
+        technology=replace(
+            scenario.technology,
+            charge_power_kw=200,
+            discharge_power_kw=50,
+        ),
+    )
+
+    result = simulator.run(scenario)
+    split_power_result = simulator.run(split_power_scenario)
+
+    assert split_power_result.technology_result.charge_time_h == pytest.approx(
+        result.technology_result.charge_time_h / 2
+    )
+    assert split_power_result.technology_result.discharge_time_h == pytest.approx(
+        result.technology_result.discharge_time_h * 2
+    )
+    assert split_power_result.technology_result.stored_energy_kwh == pytest.approx(
+        result.technology_result.stored_energy_kwh
+    )
+    assert split_power_result.technology_result.delivered_energy_kwh == pytest.approx(
+        result.technology_result.delivered_energy_kwh
+    )
 
 
 def test_standby_loss_reduces_annual_energy_but_not_technical_energy():

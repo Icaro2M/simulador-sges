@@ -38,6 +38,8 @@ class SimulationService:
                 "discharge_efficiency": technology_result["discharge_efficiency"],
                 "round_trip_efficiency": technology_result["round_trip_efficiency"],
                 "nominal_power_kw": technology_result["nominal_power_kw"],
+                "charge_power_kw": technology_result["charge_power_kw"],
+                "discharge_power_kw": technology_result["discharge_power_kw"],
 
                 "initial_capex": result["initial_capex"],
                 "annual_opex": result["annual_opex"],

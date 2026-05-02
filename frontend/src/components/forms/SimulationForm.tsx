@@ -21,6 +21,8 @@ const defaultValues: SimulationRequest = {
   mass_kg: 10000,
   height_m: 100,
   nominal_power_kw: 500,
+  charge_power_kw: 500,
+  discharge_power_kw: 500,
 
   charge_efficiency: 0.9,
   discharge_efficiency: 0.9,

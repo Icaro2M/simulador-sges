@@ -54,6 +54,8 @@ export function SensitivityForm({ register, errors }: Props) {
               <option value="technology.height_m">Altura</option>
               <option value="technology.mass_kg">Massa</option>
               <option value="technology.nominal_power_kw">Potência nominal</option>
+              <option value="technology.charge_power_kw">Potência de carga</option>
+              <option value="technology.discharge_power_kw">Potência de descarga</option>
               <option value="technology.charge_efficiency">Eficiência de carga</option>
               <option value="technology.discharge_efficiency">Eficiência de descarga</option>
 
@@ -142,7 +144,7 @@ export function SensitivityForm({ register, errors }: Props) {
         title="Parâmetros físicos"
         description="Base física para o cálculo energético."
       >
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <label className="grid gap-2 text-sm font-semibold text-slate-700">
             Massa (kg)
             <input
@@ -177,6 +179,36 @@ export function SensitivityForm({ register, errors }: Props) {
             />
             <FieldError
               message={errors.base_scenario?.nominal_power_kw?.message}
+            />
+          </label>
+
+          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            Potência de carga (kW)
+            <input
+              className={controlClass}
+              type="number"
+              step="any"
+              {...register("base_scenario.charge_power_kw", {
+                valueAsNumber: true,
+              })}
+            />
+            <FieldError
+              message={errors.base_scenario?.charge_power_kw?.message}
+            />
+          </label>
+
+          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            Potência de descarga (kW)
+            <input
+              className={controlClass}
+              type="number"
+              step="any"
+              {...register("base_scenario.discharge_power_kw", {
+                valueAsNumber: true,
+              })}
+            />
+            <FieldError
+              message={errors.base_scenario?.discharge_power_kw?.message}
             />
           </label>
         </div>

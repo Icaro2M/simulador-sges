@@ -7,6 +7,8 @@ export interface SimulationRequest {
   mass_kg: number;
   height_m: number;
   nominal_power_kw: number;
+  charge_power_kw: number;
+  discharge_power_kw: number;
 
   charge_efficiency: number;
   discharge_efficiency: number;
@@ -35,6 +37,8 @@ export interface TechnologySimulationResult {
   discharge_efficiency: number;
   round_trip_efficiency: number;
   nominal_power_kw: number;
+  charge_power_kw: number;
+  discharge_power_kw: number;
   charge_time_h: number;
   discharge_time_h: number;
 }

@@ -8,9 +8,11 @@ export const simulationSchema = z.object({
   mass_kg: z.number().positive("A massa deve ser maior que zero"),
   height_m: z.number().positive("A altura deve ser maior que zero"),
   nominal_power_kw: z.number().positive("A potência deve ser maior que zero"),
+  charge_power_kw: z.number().positive("A potência de carga deve ser maior que zero"),
+  discharge_power_kw: z.number().positive("A potência de descarga deve ser maior que zero"),
 
-  charge_efficiency: z.number().min(0).max(1),
-  discharge_efficiency: z.number().min(0).max(1),
+  charge_efficiency: z.number().gt(0).max(1),
+  discharge_efficiency: z.number().gt(0).max(1),
 
   cycle_loss_fraction: z.number().min(0).lt(1, "A perda fracionaria deve ser menor que 1"),
   fixed_cycle_loss_kwh: z.number().min(0),

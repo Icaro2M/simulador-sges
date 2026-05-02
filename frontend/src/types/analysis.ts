@@ -10,6 +10,8 @@ export interface ComparisonResultItem {
   discharge_efficiency: number;
   round_trip_efficiency: number;
   nominal_power_kw: number;
+  charge_power_kw: number;
+  discharge_power_kw: number;
   initial_capex: number;
   annual_opex: number;
   annual_discharged_energy_mwh: number;
