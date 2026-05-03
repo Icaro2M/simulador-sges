@@ -47,6 +47,9 @@ def simulation_result_to_dict(result: SimulationResult) -> dict:
             "annual_discharged_energy_before_availability_mwh": (
                 result.annual_discharged_energy_before_availability_mwh
             ),
+            "replacement_cost": result.replacement_cost,
+            "replacement_year": result.replacement_year,
+            "end_of_life_cost": result.end_of_life_cost,
             "annual_opex": result.annual_opex,
             "annual_discharged_energy_mwh": result.annual_discharged_energy_mwh,
             "annual_charging_energy_mwh": result.annual_charging_energy_mwh,
@@ -142,6 +145,9 @@ def export_result_to_csv(result: SimulationResult, path: str | Path) -> None:
             "annual_discharged_energy_before_availability_mwh",
             data["economics"]["annual_discharged_energy_before_availability_mwh"],
         ),
+        ("replacement_cost", data["economics"]["replacement_cost"]),
+        ("replacement_year", data["economics"]["replacement_year"]),
+        ("end_of_life_cost", data["economics"]["end_of_life_cost"]),
         ("annual_opex", data["economics"]["annual_opex"]),
         ("annual_discharged_energy_mwh", data["economics"]["annual_discharged_energy_mwh"]),
         ("annual_charging_energy_mwh", data["economics"]["annual_charging_energy_mwh"]),

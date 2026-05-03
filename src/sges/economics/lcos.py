@@ -55,6 +55,13 @@ def calculate_lcos(data: LcosInput) -> LcosResult:
     if data.end_of_life_cost < 0:
         raise InvalidParameterError("end_of_life_cost must be greater than or equal to zero")
 
+    if data.replacement_year is not None and not (
+        1 <= data.replacement_year <= data.project_lifetime_years
+    ):
+        raise InvalidParameterError(
+            "replacement_year must be between 1 and project_lifetime_years"
+        )
+
     discounted_cost = data.initial_capex
     discounted_opex = 0.0
     discounted_charging_energy_cost = 0.0

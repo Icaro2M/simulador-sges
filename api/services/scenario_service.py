@@ -37,5 +37,8 @@ class ScenarioService:
                 discount_rate=request.discount_rate,
                 cycles_per_year=request.cycles_per_year,
                 availability_factor=request.availability_factor,
+                replacement_cost=request.replacement_cost,
+                replacement_year=request.replacement_year,
+                end_of_life_cost=request.end_of_life_cost,
             ),
         )

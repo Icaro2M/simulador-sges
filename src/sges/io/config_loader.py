@@ -57,6 +57,21 @@ class EconomicsConfig(BaseModel):
     discount_rate: float = Field(ge=0)
     cycles_per_year: int = Field(gt=0)
     availability_factor: float = Field(default=1.0, ge=0, le=1)
+    replacement_cost: float = Field(default=0.0, ge=0)
+    replacement_year: int | None = Field(default=None, gt=0)
+    end_of_life_cost: float = Field(default=0.0, ge=0)
+
+    @model_validator(mode="after")
+    def validate_replacement_year(self):
+        if (
+            self.replacement_year is not None
+            and self.replacement_year > self.project_lifetime_years
+        ):
+            raise ValueError(
+                "replacement_year must be between 1 and project_lifetime_years"
+            )
+
+        return self
 
 
 class ScenarioConfig(BaseModel):
@@ -108,5 +123,8 @@ def load_scenario_from_yaml(path: str | Path) -> Scenario:
             discount_rate=config.economics.discount_rate,
             cycles_per_year=config.economics.cycles_per_year,
             availability_factor=config.economics.availability_factor,
+            replacement_cost=config.economics.replacement_cost,
+            replacement_year=config.economics.replacement_year,
+            end_of_life_cost=config.economics.end_of_life_cost,
         ),
     )

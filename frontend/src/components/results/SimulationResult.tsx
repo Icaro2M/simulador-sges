@@ -219,6 +219,26 @@ export function SimulationResult({ response }: SimulationResultProps) {
       value: formatCurrency(annualLcosCost),
     },
     {
+      label: "Custo de reposicao nominal",
+      value: formatCurrency(result.replacement_cost),
+    },
+    {
+      label: "Ano da reposicao",
+      value: result.replacement_year ?? "-",
+    },
+    {
+      label: "Valor presente da reposicao",
+      value: lcos ? formatCurrency(lcos.discounted_replacement_cost) : "-",
+    },
+    {
+      label: "Custo de fim de vida nominal",
+      value: formatCurrency(result.end_of_life_cost),
+    },
+    {
+      label: "Valor presente do fim de vida",
+      value: lcos ? formatCurrency(lcos.discounted_end_of_life_cost) : "-",
+    },
+    {
       label: "Energia anual bruta sem disponibilidade",
       value: formatNumber(annualDischargedEnergyBeforeAvailabilityMwh),
       unit: "MWh",

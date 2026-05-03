@@ -75,6 +75,15 @@ export function SensitivityForm({ register, errors }: Props) {
               <option value="economics.availability_factor">
                 Disponibilidade operacional
               </option>
+              <option value="economics.replacement_cost">
+                Custo de reposicao
+              </option>
+              <option value="economics.replacement_year">
+                Ano da reposicao
+              </option>
+              <option value="economics.end_of_life_cost">
+                Custo de fim de vida
+              </option>
 
               <option value="losses.cycle_loss_fraction">Perda por ciclo</option>
               <option value="losses.fixed_cycle_loss_kwh">
@@ -436,6 +445,48 @@ export function SensitivityForm({ register, errors }: Props) {
             <FieldError
               message={errors.base_scenario?.availability_factor?.message}
             />
+          </label>
+
+          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            Custo de reposicao
+            <input
+              className={controlClass}
+              type="number"
+              step="any"
+              min="0"
+              {...register("base_scenario.replacement_cost", {
+                setValueAs: (value) => (value === "" ? undefined : Number(value)),
+              })}
+            />
+            <FieldError message={errors.base_scenario?.replacement_cost?.message} />
+          </label>
+
+          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            Ano da reposicao
+            <input
+              className={controlClass}
+              type="number"
+              step="1"
+              min="1"
+              {...register("base_scenario.replacement_year", {
+                setValueAs: (value) => (value === "" ? null : Number(value)),
+              })}
+            />
+            <FieldError message={errors.base_scenario?.replacement_year?.message} />
+          </label>
+
+          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            Custo de fim de vida
+            <input
+              className={controlClass}
+              type="number"
+              step="any"
+              min="0"
+              {...register("base_scenario.end_of_life_cost", {
+                setValueAs: (value) => (value === "" ? undefined : Number(value)),
+              })}
+            />
+            <FieldError message={errors.base_scenario?.end_of_life_cost?.message} />
           </label>
         </div>
       </FormSection>

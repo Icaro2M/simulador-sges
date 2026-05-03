@@ -306,12 +306,36 @@ def _print_single_result(result):
     table.add_row("Annual charging energy", f"{result.annual_charging_energy_mwh:,.2f} MWh")
     table.add_row("Annual charging cost", f"${result.annual_charging_energy_cost:,.2f}")
     table.add_row("Annual LCOS cost", f"${result.annual_lcos_cost:,.2f}")
+    table.add_row("Replacement cost", f"${result.replacement_cost:,.2f}")
+    table.add_row(
+        "Replacement year",
+        str(result.replacement_year) if result.replacement_year is not None else "-",
+    )
+    table.add_row("End-of-life cost", f"${result.end_of_life_cost:,.2f}")
     table.add_row("Status", result.status)
     if result.warnings:
         table.add_row("Warnings", " | ".join(result.warnings))
     table.add_row("Initial CAPEX", f"${result.initial_capex:,.2f}")
     table.add_row("Annual OPEX", f"${result.annual_opex:,.2f}")
     table.add_row("Annual discharged energy", f"{result.annual_discharged_energy_mwh:,.2f} MWh")
+    table.add_row(
+        "Discounted replacement cost",
+        f"${result.lcos_result.discounted_replacement_cost:,.2f}"
+        if result.lcos_result is not None
+        else "-",
+    )
+    table.add_row(
+        "Discounted end-of-life cost",
+        f"${result.lcos_result.discounted_end_of_life_cost:,.2f}"
+        if result.lcos_result is not None
+        else "-",
+    )
+    table.add_row(
+        "Discounted LCOS cost",
+        f"${result.lcos_result.discounted_cost:,.2f}"
+        if result.lcos_result is not None
+        else "-",
+    )
     table.add_row(
         "LCOS",
         _format_lcos(

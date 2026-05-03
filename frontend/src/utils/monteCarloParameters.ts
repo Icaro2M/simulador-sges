@@ -47,4 +47,22 @@ export const monteCarloParameterOptions = [
     defaultMin: 0.04,
     defaultMax: 0.14,
   },
+  {
+    path: "economics.availability_factor",
+    label: "Disponibilidade operacional",
+    defaultMin: 0.8,
+    defaultMax: 1,
+  },
+  {
+    path: "economics.replacement_cost",
+    label: "Custo de reposicao",
+    defaultMin: 0,
+    defaultMax: 50000,
+  },
+  {
+    path: "economics.end_of_life_cost",
+    label: "Custo de fim de vida",
+    defaultMin: 0,
+    defaultMax: 30000,
+  },
 ] as const;

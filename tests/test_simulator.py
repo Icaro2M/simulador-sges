@@ -137,6 +137,39 @@ def test_charging_energy_cost_is_included_in_lcos_inputs():
     )
 
 
+def test_replacement_and_end_of_life_costs_are_included_in_lcos_inputs():
+    simulator = SGESSimulator()
+    scenario = create_test_scenario()
+    lifecycle_cost_scenario = replace(
+        scenario,
+        economics=replace(
+            scenario.economics,
+            replacement_cost=20000,
+            replacement_year=5,
+            end_of_life_cost=10000,
+        ),
+    )
+
+    base_result = simulator.run(scenario)
+    lifecycle_cost_result = simulator.run(lifecycle_cost_scenario)
+
+    assert lifecycle_cost_result.replacement_cost == 20000
+    assert lifecycle_cost_result.replacement_year == 5
+    assert lifecycle_cost_result.end_of_life_cost == 10000
+    assert lifecycle_cost_result.lcos_result is not None
+    assert base_result.lcos_result is not None
+    assert lifecycle_cost_result.lcos_result.discounted_replacement_cost > 0
+    assert lifecycle_cost_result.lcos_result.discounted_end_of_life_cost > 0
+    assert lifecycle_cost_result.lcos_result.discounted_cost == pytest.approx(
+        base_result.lcos_result.discounted_cost
+        + lifecycle_cost_result.lcos_result.discounted_replacement_cost
+        + lifecycle_cost_result.lcos_result.discounted_end_of_life_cost
+    )
+    assert lifecycle_cost_result.lcos_result.lcos_per_mwh > (
+        base_result.lcos_result.lcos_per_mwh
+    )
+
+
 def test_energy_flow_is_explicit_and_consistent():
     simulator = SGESSimulator()
     scenario = create_test_scenario()

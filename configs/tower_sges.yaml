@@ -26,3 +26,6 @@ economics:
   discount_rate: 0.08
   cycles_per_year: 300
   availability_factor: 1.0
+  replacement_cost: 0
+  replacement_year:
+  end_of_life_cost: 0

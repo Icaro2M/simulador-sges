@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import type { DefaultValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import type { SimulationRequest } from "../../types/simulation";
@@ -14,7 +15,7 @@ interface SimulationFormProps {
   isLoading?: boolean;
 }
 
-const defaultValues: SimulationRequest = {
+const defaultValues: DefaultValues<SimulationRequest> = {
   name: "Teste SGES Tower",
   technology_type: "tower",
 

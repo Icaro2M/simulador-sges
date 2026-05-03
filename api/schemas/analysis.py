@@ -24,6 +24,9 @@ class ComparisonResultItem(BaseModel):
     initial_capex: float
     availability_factor: float
     annual_discharged_energy_before_availability_mwh: float
+    replacement_cost: float
+    replacement_year: int | None
+    end_of_life_cost: float
     annual_opex: float
     annual_discharged_energy_mwh: float
     lcos_per_mwh: float | None

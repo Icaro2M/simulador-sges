@@ -30,6 +30,9 @@ class SimulationRequest(BaseModel):
     discount_rate: float = Field(ge=0, lt=1)
     cycles_per_year: int = Field(gt=0)
     availability_factor: float = Field(default=1.0, ge=0, le=1)
+    replacement_cost: float = Field(default=0.0, ge=0)
+    replacement_year: int | None = Field(default=None, gt=0)
+    end_of_life_cost: float = Field(default=0.0, ge=0)
 
     @model_validator(mode="after")
     def fill_power_limits(self):
@@ -46,5 +49,13 @@ class SimulationRequest(BaseModel):
 
         if self.nominal_power_kw is None:
             self.nominal_power_kw = max(self.charge_power_kw, self.discharge_power_kw)
+
+        if (
+            self.replacement_year is not None
+            and self.replacement_year > self.project_lifetime_years
+        ):
+            raise ValueError(
+                "replacement_year must be between 1 and project_lifetime_years"
+            )
 
         return self

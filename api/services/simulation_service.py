@@ -46,6 +46,9 @@ class SimulationService:
                 "annual_discharged_energy_before_availability_mwh": result[
                     "annual_discharged_energy_before_availability_mwh"
                 ],
+                "replacement_cost": result["replacement_cost"],
+                "replacement_year": result["replacement_year"],
+                "end_of_life_cost": result["end_of_life_cost"],
                 "annual_opex": result["annual_opex"],
                 "annual_discharged_energy_mwh": result[
                     "annual_discharged_energy_mwh"

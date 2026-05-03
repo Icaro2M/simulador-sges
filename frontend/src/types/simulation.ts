@@ -28,6 +28,9 @@ export interface SimulationRequest {
   discount_rate: number;
   cycles_per_year: number;
   availability_factor: number;
+  replacement_cost?: number;
+  replacement_year?: number | null;
+  end_of_life_cost?: number;
 }
 
 export interface TechnologySimulationResult {
@@ -78,6 +81,9 @@ export interface SimulationResultData {
   initial_capex: number;
   availability_factor: number;
   annual_discharged_energy_before_availability_mwh: number;
+  replacement_cost: number;
+  replacement_year: number | null;
+  end_of_life_cost: number;
   annual_opex: number;
   annual_discharged_energy_mwh: number;
   annual_charging_energy_mwh?: number;

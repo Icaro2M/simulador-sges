@@ -188,6 +188,24 @@ export function DispatchPage() {
       return false;
     }
 
+    const replacementCost = scenario.replacement_cost ?? 0;
+    const endOfLifeCost = scenario.end_of_life_cost ?? 0;
+
+    if (replacementCost < 0 || endOfLifeCost < 0) {
+      setValidationError("Custos de reposicao e fim de vida nao podem ser negativos.");
+      return false;
+    }
+
+    if (
+      scenario.replacement_year !== undefined &&
+      scenario.replacement_year !== null &&
+      (scenario.replacement_year < 1 ||
+        scenario.replacement_year > scenario.project_lifetime_years)
+    ) {
+      setValidationError("O ano de reposicao precisa estar dentro da vida util.");
+      return false;
+    }
+
     if (priceProfile.length === 0) {
       setValidationError("O perfil de preços precisa ter pelo menos um ponto.");
       return false;
@@ -570,6 +588,51 @@ export function DispatchPage() {
                   updateScenarioField(
                     "availability_factor",
                     Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
+            <Field label="Custo de reposicao">
+              <input
+                className={inputClass}
+                type="number"
+                min={0}
+                value={scenario.replacement_cost ?? ""}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "replacement_cost",
+                    event.target.value === "" ? undefined : Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
+            <Field label="Ano da reposicao">
+              <input
+                className={inputClass}
+                type="number"
+                min={1}
+                value={scenario.replacement_year ?? ""}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "replacement_year",
+                    event.target.value === "" ? null : Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
+            <Field label="Custo de fim de vida">
+              <input
+                className={inputClass}
+                type="number"
+                min={0}
+                value={scenario.end_of_life_cost ?? ""}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "end_of_life_cost",
+                    event.target.value === "" ? undefined : Number(event.target.value)
                   )
                 }
               />

@@ -25,6 +25,9 @@ class SimulationResult:
     initial_capex: float
     availability_factor: float
     annual_discharged_energy_before_availability_mwh: float
+    replacement_cost: float
+    replacement_year: int | None
+    end_of_life_cost: float
     annual_opex: float
     annual_discharged_energy_mwh: float
     annual_charging_energy_mwh: float

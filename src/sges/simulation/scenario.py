@@ -34,10 +34,30 @@ class EconomicScenario:
     cycles_per_year: int
     charging_energy_cost_per_mwh: float = 0.0
     availability_factor: float = 1.0
+    replacement_cost: float = 0.0
+    replacement_year: int | None = None
+    end_of_life_cost: float = 0.0
 
     def __post_init__(self):
         if not 0 <= self.availability_factor <= 1:
             raise InvalidParameterError("availability_factor must be between 0 and 1")
+
+        if self.replacement_cost < 0:
+            raise InvalidParameterError(
+                "replacement_cost must be greater than or equal to zero"
+            )
+
+        if self.end_of_life_cost < 0:
+            raise InvalidParameterError(
+                "end_of_life_cost must be greater than or equal to zero"
+            )
+
+        if self.replacement_year is not None and not (
+            1 <= self.replacement_year <= self.project_lifetime_years
+        ):
+            raise InvalidParameterError(
+                "replacement_year must be between 1 and project_lifetime_years"
+            )
 
 
 @dataclass(frozen=True)

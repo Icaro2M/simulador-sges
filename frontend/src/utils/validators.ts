@@ -29,4 +29,27 @@ export const simulationSchema = z.object({
   discount_rate: z.number().min(0).max(1),
   cycles_per_year: z.number().positive(),
   availability_factor: z.number().min(0).max(1),
-});
+  replacement_cost: z.number().min(0).optional(),
+  replacement_year: z
+    .number()
+    .positive()
+    .nullable()
+    .optional()
+    .refine(
+      (value) =>
+        value === undefined || value === null || Number.isInteger(value),
+      {
+      message: "O ano de reposicao deve ser inteiro",
+      }
+    ),
+  end_of_life_cost: z.number().min(0).optional(),
+}).refine(
+  (data) =>
+    data.replacement_year === undefined ||
+    data.replacement_year === null ||
+    data.replacement_year <= data.project_lifetime_years,
+  {
+    message: "O ano de reposicao deve estar dentro da vida util",
+    path: ["replacement_year"],
+  }
+);

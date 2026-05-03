@@ -108,6 +108,9 @@ class SGESSimulator:
                     project_lifetime_years=scenario.economics.project_lifetime_years,
                     discount_rate=scenario.economics.discount_rate,
                     annual_charging_energy_cost=annual_charging_energy_cost,
+                    replacement_cost=scenario.economics.replacement_cost,
+                    replacement_year=scenario.economics.replacement_year,
+                    end_of_life_cost=scenario.economics.end_of_life_cost,
                 )
             )
         else:
@@ -153,6 +156,9 @@ class SGESSimulator:
             annual_discharged_energy_before_availability_mwh=(
                 annual_discharged_energy_before_availability_mwh
             ),
+            replacement_cost=scenario.economics.replacement_cost,
+            replacement_year=scenario.economics.replacement_year,
+            end_of_life_cost=scenario.economics.end_of_life_cost,
             annual_opex=annual_opex,
             annual_discharged_energy_mwh=annual_discharged_energy_mwh,
             annual_charging_energy_mwh=annual_charging_energy_mwh,
