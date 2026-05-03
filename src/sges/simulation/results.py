@@ -23,6 +23,8 @@ class SimulationResult:
     status: str
     warnings: list[str]
     initial_capex: float
+    availability_factor: float
+    annual_discharged_energy_before_availability_mwh: float
     annual_opex: float
     annual_discharged_energy_mwh: float
     annual_charging_energy_mwh: float

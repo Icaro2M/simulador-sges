@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from sges.core.exceptions import InvalidParameterError
+
 
 @dataclass(frozen=True)
 class TechnologyScenario:
@@ -31,6 +33,11 @@ class EconomicScenario:
     discount_rate: float
     cycles_per_year: int
     charging_energy_cost_per_mwh: float = 0.0
+    availability_factor: float = 1.0
+
+    def __post_init__(self):
+        if not 0 <= self.availability_factor <= 1:
+            raise InvalidParameterError("availability_factor must be between 0 and 1")
 
 
 @dataclass(frozen=True)

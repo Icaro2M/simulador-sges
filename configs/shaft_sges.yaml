@@ -25,3 +25,4 @@ economics:
   project_lifetime_years: 35
   discount_rate: 0.08
   cycles_per_year: 320
+  availability_factor: 1.0

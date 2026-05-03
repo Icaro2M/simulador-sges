@@ -72,6 +72,9 @@ export function SensitivityForm({ register, errors }: Props) {
               <option value="economics.charging_energy_cost_per_mwh">
                 Custo da energia de carga
               </option>
+              <option value="economics.availability_factor">
+                Disponibilidade operacional
+              </option>
 
               <option value="losses.cycle_loss_fraction">Perda por ciclo</option>
               <option value="losses.fixed_cycle_loss_kwh">
@@ -416,6 +419,23 @@ export function SensitivityForm({ register, errors }: Props) {
               })}
             />
             <FieldError message={errors.base_scenario?.cycles_per_year?.message} />
+          </label>
+
+          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            Disponibilidade operacional
+            <input
+              className={controlClass}
+              type="number"
+              step="any"
+              min="0"
+              max="1"
+              {...register("base_scenario.availability_factor", {
+                valueAsNumber: true,
+              })}
+            />
+            <FieldError
+              message={errors.base_scenario?.availability_factor?.message}
+            />
           </label>
         </div>
       </FormSection>

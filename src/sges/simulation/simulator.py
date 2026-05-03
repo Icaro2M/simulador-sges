@@ -55,10 +55,14 @@ class SGESSimulator:
             standby_loss_per_cycle_kwh * scenario.economics.cycles_per_year
         )
 
-        annual_discharged_energy_mwh = (
+        availability_factor = scenario.economics.availability_factor
+        annual_discharged_energy_before_availability_mwh = (
             effective_delivered_energy_kwh
             * scenario.economics.cycles_per_year
         ) / 1000
+        annual_discharged_energy_mwh = (
+            annual_discharged_energy_before_availability_mwh * availability_factor
+        )
         annual_charging_energy_mwh = (
             annual_discharged_energy_mwh / effective_round_trip_efficiency
             if annual_discharged_energy_mwh > 0
@@ -108,15 +112,24 @@ class SGESSimulator:
             )
         else:
             status = "no_deliverable_energy"
-            warnings.append(
-                "As perdas configuradas deixam a energia anual entregavel igual a zero; "
-                "o LCOS fica indefinido. "
-                f"Energia armazenada: {technology_result.stored_energy_kwh:.4f} kWh; "
-                f"energia eletrica de saida antes das perdas de ciclo: {gross_delivered_energy_kwh:.4f} kWh; "
-                f"tempo medio em standby por ciclo: {standby_hours_per_cycle:.4f} h; "
-                f"perda em standby por ciclo: {standby_loss_per_cycle_kwh:.4f} kWh; "
-                f"perda de ciclo por ciclo: {cycle_loss_per_cycle_kwh:.4f} kWh."
-            )
+            if annual_discharged_energy_before_availability_mwh > 0:
+                warnings.append(
+                    "O fator de disponibilidade deixa a energia anual entregavel "
+                    "igual a zero; o LCOS fica indefinido. "
+                    f"Disponibilidade: {availability_factor:.4f}; "
+                    "energia anual bruta sem disponibilidade: "
+                    f"{annual_discharged_energy_before_availability_mwh:.4f} MWh."
+                )
+            else:
+                warnings.append(
+                    "As perdas configuradas deixam a energia anual entregavel igual a zero; "
+                    "o LCOS fica indefinido. "
+                    f"Energia armazenada: {technology_result.stored_energy_kwh:.4f} kWh; "
+                    f"energia eletrica de saida antes das perdas de ciclo: {gross_delivered_energy_kwh:.4f} kWh; "
+                    f"tempo medio em standby por ciclo: {standby_hours_per_cycle:.4f} h; "
+                    f"perda em standby por ciclo: {standby_loss_per_cycle_kwh:.4f} kWh; "
+                    f"perda de ciclo por ciclo: {cycle_loss_per_cycle_kwh:.4f} kWh."
+                )
 
         return SimulationResult(
             scenario_name=scenario.name,
@@ -136,6 +149,10 @@ class SGESSimulator:
             status=status,
             warnings=warnings,
             initial_capex=initial_capex,
+            availability_factor=availability_factor,
+            annual_discharged_energy_before_availability_mwh=(
+                annual_discharged_energy_before_availability_mwh
+            ),
             annual_opex=annual_opex,
             annual_discharged_energy_mwh=annual_discharged_energy_mwh,
             annual_charging_energy_mwh=annual_charging_energy_mwh,

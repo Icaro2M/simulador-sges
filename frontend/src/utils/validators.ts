@@ -28,4 +28,5 @@ export const simulationSchema = z.object({
   project_lifetime_years: z.number().positive(),
   discount_rate: z.number().min(0).max(1),
   cycles_per_year: z.number().positive(),
+  availability_factor: z.number().min(0).max(1),
 });

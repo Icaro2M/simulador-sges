@@ -44,6 +44,8 @@ def make_simulation_result() -> SimulationResult:
         status="ok",
         warnings=[],
         initial_capex=0.0,
+        availability_factor=1.0,
+        annual_discharged_energy_before_availability_mwh=0.0,
         annual_opex=0.0,
         annual_discharged_energy_mwh=0.0,
         annual_charging_energy_mwh=0.0,

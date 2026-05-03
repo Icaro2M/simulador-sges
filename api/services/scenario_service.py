@@ -36,5 +36,6 @@ class ScenarioService:
                 project_lifetime_years=request.project_lifetime_years,
                 discount_rate=request.discount_rate,
                 cycles_per_year=request.cycles_per_year,
+                availability_factor=request.availability_factor,
             ),
         )

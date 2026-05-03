@@ -13,6 +13,8 @@ export interface ComparisonResultItem {
   charge_power_kw: number;
   discharge_power_kw: number;
   initial_capex: number;
+  availability_factor: number;
+  annual_discharged_energy_before_availability_mwh: number;
   annual_opex: number;
   annual_discharged_energy_mwh: number;
   lcos_per_mwh: number | null;

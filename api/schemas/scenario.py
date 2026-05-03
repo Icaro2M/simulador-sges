@@ -29,6 +29,7 @@ class SimulationRequest(BaseModel):
     project_lifetime_years: int = Field(gt=0)
     discount_rate: float = Field(ge=0, lt=1)
     cycles_per_year: int = Field(gt=0)
+    availability_factor: float = Field(default=1.0, ge=0, le=1)
 
     @model_validator(mode="after")
     def fill_power_limits(self):

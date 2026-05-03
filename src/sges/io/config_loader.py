@@ -56,6 +56,7 @@ class EconomicsConfig(BaseModel):
     project_lifetime_years: int = Field(gt=0)
     discount_rate: float = Field(ge=0)
     cycles_per_year: int = Field(gt=0)
+    availability_factor: float = Field(default=1.0, ge=0, le=1)
 
 
 class ScenarioConfig(BaseModel):
@@ -106,5 +107,6 @@ def load_scenario_from_yaml(path: str | Path) -> Scenario:
             project_lifetime_years=config.economics.project_lifetime_years,
             discount_rate=config.economics.discount_rate,
             cycles_per_year=config.economics.cycles_per_year,
+            availability_factor=config.economics.availability_factor,
         ),
     )

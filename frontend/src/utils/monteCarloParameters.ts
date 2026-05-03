@@ -25,13 +25,13 @@ export const monteCarloParameterOptions = [
   },
   {
     path: "technology.charge_efficiency",
-    label: "EficiÃªncia de carga",
+    label: "Eficiência de carga",
     defaultMin: 0.85,
     defaultMax: 0.95,
   },
   {
     path: "technology.discharge_efficiency",
-    label: "EficiÃªncia de descarga",
+    label: "Eficiência de descarga",
     defaultMin: 0.85,
     defaultMax: 0.95,
   },

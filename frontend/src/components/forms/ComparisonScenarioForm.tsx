@@ -360,6 +360,21 @@ export function ComparisonScenarioForm({
               />
               <FieldError message={errors?.cycles_per_year?.message} />
             </label>
+
+            <label className="grid gap-2 text-sm font-semibold text-slate-700">
+              Disponibilidade operacional
+              <input
+                className={controlClass}
+                type="number"
+                step="any"
+                min="0"
+                max="1"
+                {...register(`${fieldPrefix}.availability_factor`, {
+                  valueAsNumber: true,
+                })}
+              />
+              <FieldError message={errors?.availability_factor?.message} />
+            </label>
           </div>
         </FormGroup>
       </div>

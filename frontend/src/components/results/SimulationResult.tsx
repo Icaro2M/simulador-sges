@@ -73,6 +73,10 @@ export function SimulationResult({ response }: SimulationResultProps) {
   const annualChargingEnergyCost = result.annual_charging_energy_cost ?? 0;
   const annualLcosCost =
     result.annual_lcos_cost ?? result.annual_opex + annualChargingEnergyCost;
+  const availabilityFactor = result.availability_factor ?? 1;
+  const annualDischargedEnergyBeforeAvailabilityMwh =
+    result.annual_discharged_energy_before_availability_mwh ??
+    result.annual_discharged_energy_mwh;
 
   const technicalRows = [
     {
@@ -215,7 +219,16 @@ export function SimulationResult({ response }: SimulationResultProps) {
       value: formatCurrency(annualLcosCost),
     },
     {
-      label: "Energia anual descarregada",
+      label: "Energia anual bruta sem disponibilidade",
+      value: formatNumber(annualDischargedEnergyBeforeAvailabilityMwh),
+      unit: "MWh",
+    },
+    {
+      label: "Disponibilidade operacional",
+      value: formatPercent(availabilityFactor),
+    },
+    {
+      label: "Energia anual efetiva com disponibilidade",
       value: formatNumber(result.annual_discharged_energy_mwh),
       unit: "MWh",
     },

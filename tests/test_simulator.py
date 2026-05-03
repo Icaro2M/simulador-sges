@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from api.main import app
 from api.schemas.scenario import SimulationRequest
+from sges.core.exceptions import InvalidParameterError
 from sges.simulation.scenario import (
     Scenario,
     TechnologyScenario,
@@ -225,6 +226,74 @@ def test_standby_loss_reduces_annual_energy_but_not_technical_energy():
     assert standby_result.lcos_result.lcos_per_mwh > (
         zero_standby_result.lcos_result.lcos_per_mwh
     )
+
+
+def test_availability_reduces_annual_energy_and_lcos_denominator_only():
+    simulator = SGESSimulator()
+    scenario = create_test_scenario()
+    availability_scenario = replace(
+        scenario,
+        economics=replace(scenario.economics, availability_factor=0.8),
+    )
+
+    base_result = simulator.run(scenario)
+    availability_result = simulator.run(availability_scenario)
+
+    assert availability_result.availability_factor == pytest.approx(0.8)
+    assert (
+        availability_result.annual_discharged_energy_before_availability_mwh
+    ) == pytest.approx(base_result.annual_discharged_energy_mwh)
+    assert availability_result.annual_discharged_energy_mwh == pytest.approx(
+        base_result.annual_discharged_energy_mwh * 0.8
+    )
+    assert availability_result.technology_result.max_potential_energy_kwh == (
+        base_result.technology_result.max_potential_energy_kwh
+    )
+    assert availability_result.technology_result.delivered_energy_kwh == (
+        base_result.technology_result.delivered_energy_kwh
+    )
+    assert availability_result.annual_opex == pytest.approx(
+        scenario.economics.fixed_annual_opex
+        + (
+            scenario.economics.variable_opex_per_mwh
+            * availability_result.annual_discharged_energy_mwh
+        )
+    )
+    assert availability_result.lcos_result is not None
+    assert base_result.lcos_result is not None
+    assert availability_result.lcos_result.lcos_per_mwh > (
+        base_result.lcos_result.lcos_per_mwh
+    )
+
+
+def test_zero_availability_returns_no_deliverable_energy_without_changing_cycle_energy():
+    simulator = SGESSimulator()
+    scenario = create_test_scenario()
+    zero_availability_scenario = replace(
+        scenario,
+        economics=replace(scenario.economics, availability_factor=0.0),
+    )
+
+    base_result = simulator.run(scenario)
+    result = simulator.run(zero_availability_scenario)
+
+    assert result.status == "no_deliverable_energy"
+    assert result.lcos_result is None
+    assert result.availability_factor == 0
+    assert result.annual_discharged_energy_before_availability_mwh == pytest.approx(
+        base_result.annual_discharged_energy_mwh
+    )
+    assert result.annual_discharged_energy_mwh == 0
+    assert result.technology_result.delivered_energy_kwh == pytest.approx(
+        base_result.technology_result.delivered_energy_kwh
+    )
+
+
+def test_availability_factor_must_be_between_zero_and_one():
+    scenario = create_test_scenario()
+
+    with pytest.raises(InvalidParameterError, match="availability_factor"):
+        replace(scenario.economics, availability_factor=1.1)
 
 
 def test_simulator_returns_result_when_losses_leave_no_deliverable_energy():

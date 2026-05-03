@@ -42,6 +42,7 @@ const defaultScenario: SimulationRequest = {
   project_lifetime_years: 25,
   discount_rate: 0.08,
   cycles_per_year: 300,
+  availability_factor: 1,
 };
 
 const defaultPriceProfile: DispatchPricePoint[] = [
@@ -168,17 +169,22 @@ export function DispatchPage() {
     }
 
     if (scenario.charge_efficiency <= 0 || scenario.charge_efficiency > 1) {
-      setValidationError("A eficiÃªncia de carga precisa estar entre 0 e 1.");
+      setValidationError("A eficiência de carga precisa estar entre 0 e 1.");
       return false;
     }
 
     if (scenario.discharge_efficiency <= 0 || scenario.discharge_efficiency > 1) {
-      setValidationError("A eficiÃªncia de descarga precisa estar entre 0 e 1.");
+      setValidationError("A eficiência de descarga precisa estar entre 0 e 1.");
       return false;
     }
 
     if (scenario.charging_energy_cost_per_mwh < 0) {
       setValidationError("O custo da energia de carga nao pode ser negativo.");
+      return false;
+    }
+
+    if (scenario.availability_factor < 0 || scenario.availability_factor > 1) {
+      setValidationError("A disponibilidade operacional precisa estar entre 0 e 1.");
       return false;
     }
 
@@ -546,6 +552,23 @@ export function DispatchPage() {
                 onChange={(event) =>
                   updateScenarioField(
                     "cycles_per_year",
+                    Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
+            <Field label="Disponibilidade operacional">
+              <input
+                className={inputClass}
+                type="number"
+                step="0.01"
+                min={0}
+                max={1}
+                value={scenario.availability_factor}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "availability_factor",
                     Number(event.target.value)
                   )
                 }

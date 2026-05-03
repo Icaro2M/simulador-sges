@@ -42,6 +42,10 @@ class SimulationService:
                 "discharge_power_kw": technology_result["discharge_power_kw"],
 
                 "initial_capex": result["initial_capex"],
+                "availability_factor": result["availability_factor"],
+                "annual_discharged_energy_before_availability_mwh": result[
+                    "annual_discharged_energy_before_availability_mwh"
+                ],
                 "annual_opex": result["annual_opex"],
                 "annual_discharged_energy_mwh": result[
                     "annual_discharged_energy_mwh"

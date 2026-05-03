@@ -27,6 +27,7 @@ export interface SimulationRequest {
   project_lifetime_years: number;
   discount_rate: number;
   cycles_per_year: number;
+  availability_factor: number;
 }
 
 export interface TechnologySimulationResult {
@@ -75,6 +76,8 @@ export interface SimulationResultData {
   status: string;
   warnings: string[];
   initial_capex: number;
+  availability_factor: number;
+  annual_discharged_energy_before_availability_mwh: number;
   annual_opex: number;
   annual_discharged_energy_mwh: number;
   annual_charging_energy_mwh?: number;

@@ -41,6 +41,7 @@ const defaultValues: SimulationRequest = {
   project_lifetime_years: 20,
   discount_rate: 0.08,
   cycles_per_year: 300,
+  availability_factor: 1,
 };
 
 export function SimulationForm({

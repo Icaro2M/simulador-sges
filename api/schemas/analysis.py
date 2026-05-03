@@ -22,6 +22,8 @@ class ComparisonResultItem(BaseModel):
     charge_power_kw: float
     discharge_power_kw: float
     initial_capex: float
+    availability_factor: float
+    annual_discharged_energy_before_availability_mwh: float
     annual_opex: float
     annual_discharged_energy_mwh: float
     lcos_per_mwh: float | None

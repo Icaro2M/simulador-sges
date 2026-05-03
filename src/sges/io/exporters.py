@@ -43,6 +43,10 @@ def simulation_result_to_dict(result: SimulationResult) -> dict:
         },
         "economics": {
             "initial_capex": result.initial_capex,
+            "availability_factor": result.availability_factor,
+            "annual_discharged_energy_before_availability_mwh": (
+                result.annual_discharged_energy_before_availability_mwh
+            ),
             "annual_opex": result.annual_opex,
             "annual_discharged_energy_mwh": result.annual_discharged_energy_mwh,
             "annual_charging_energy_mwh": result.annual_charging_energy_mwh,
@@ -133,6 +137,11 @@ def export_result_to_csv(result: SimulationResult, path: str | Path) -> None:
         ("standby_loss_per_cycle_kwh", data["losses"]["standby_loss_per_cycle_kwh"]),
         ("annual_standby_loss_kwh", data["losses"]["annual_standby_loss_kwh"]),
         ("initial_capex", data["economics"]["initial_capex"]),
+        ("availability_factor", data["economics"]["availability_factor"]),
+        (
+            "annual_discharged_energy_before_availability_mwh",
+            data["economics"]["annual_discharged_energy_before_availability_mwh"],
+        ),
         ("annual_opex", data["economics"]["annual_opex"]),
         ("annual_discharged_energy_mwh", data["economics"]["annual_discharged_energy_mwh"]),
         ("annual_charging_energy_mwh", data["economics"]["annual_charging_energy_mwh"]),
