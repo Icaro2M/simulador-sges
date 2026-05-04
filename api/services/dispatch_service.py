@@ -38,8 +38,31 @@ class DispatchService:
                 ),
             ),
         )
+        technology_result = simulation_result.technology_result
+        summary = dispatch_result.attrs.get("summary", {})
+        summary.update(
+            {
+                "technology_name": technology_result.technology_name,
+                "storage_capacity_kwh": technology_result.stored_energy_kwh,
+                "max_potential_energy_kwh": (
+                    technology_result.max_potential_energy_kwh
+                ),
+                "effective_mass_kg": technology_result.effective_mass_kg,
+                "usable_height_m": technology_result.usable_height_m,
+                "usable_depth_m": technology_result.usable_depth_m,
+                "base_capex": simulation_result.base_capex,
+                "technology_specific_capex": (
+                    simulation_result.technology_specific_capex
+                ),
+                "tower_structure_cost": simulation_result.tower_structure_cost,
+                "shaft_rehabilitation_cost": (
+                    simulation_result.shaft_rehabilitation_cost
+                ),
+                "initial_capex": simulation_result.initial_capex,
+            }
+        )
 
         return {
             "results": dispatch_result.to_dict(orient="records"),
-            "summary": dispatch_result.attrs.get("summary", {}),
+            "summary": summary,
         }

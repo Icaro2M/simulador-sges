@@ -19,6 +19,12 @@ class TechnologyResult:
     discharge_power_kw: float
     charge_time_h: float
     discharge_time_h: float
+    effective_mass_kg: float | None = None
+    usable_height_m: float | None = None
+    usable_depth_m: float | None = None
+    tower_structure_cost: float = 0.0
+    shaft_rehabilitation_cost: float = 0.0
+    technology_specific_capex: float = 0.0
 
 
 class GravityStorageTechnology(ABC):

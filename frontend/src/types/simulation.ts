@@ -9,6 +9,14 @@ export interface SimulationRequest {
   nominal_power_kw: number;
   charge_power_kw: number;
   discharge_power_kw: number;
+  block_count?: number | null;
+  mass_per_block_kg?: number | null;
+  usable_height_fraction?: number;
+  structure_cost_per_meter?: number;
+  usable_depth_fraction?: number;
+  shaft_rehabilitation_cost?: number;
+  material_density_kg_m3?: number | null;
+  container_volume_m3?: number | null;
 
   charge_efficiency: number;
   discharge_efficiency: number;
@@ -49,6 +57,12 @@ export interface TechnologySimulationResult {
   discharge_power_kw: number;
   charge_time_h: number;
   discharge_time_h: number;
+  effective_mass_kg?: number | null;
+  usable_height_m?: number | null;
+  usable_depth_m?: number | null;
+  tower_structure_cost?: number;
+  shaft_rehabilitation_cost?: number;
+  technology_specific_capex?: number;
 }
 
 export interface LcosResult {
@@ -79,6 +93,10 @@ export interface SimulationResultData {
   status: string;
   warnings: string[];
   initial_capex: number;
+  base_capex?: number;
+  technology_specific_capex?: number;
+  tower_structure_cost?: number;
+  shaft_rehabilitation_cost?: number;
   availability_factor: number;
   annual_discharged_energy_before_availability_mwh: number;
   replacement_cost: number;

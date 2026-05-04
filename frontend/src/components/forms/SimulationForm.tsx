@@ -24,6 +24,10 @@ const defaultValues: DefaultValues<SimulationRequest> = {
   nominal_power_kw: 500,
   charge_power_kw: 500,
   discharge_power_kw: 500,
+  usable_height_fraction: 1,
+  structure_cost_per_meter: 0,
+  usable_depth_fraction: 1,
+  shaft_rehabilitation_cost: 0,
 
   charge_efficiency: 0.9,
   discharge_efficiency: 0.9,
@@ -51,6 +55,7 @@ export function SimulationForm({
 }: SimulationFormProps) {
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<SimulationRequest>({
@@ -62,7 +67,7 @@ export function SimulationForm({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid gap-6">
         <ScenarioForm register={register} errors={errors} />
-        <TechnologyForm register={register} errors={errors} />
+        <TechnologyForm register={register} control={control} errors={errors} />
         <LossesForm register={register} errors={errors} />
         <EconomicsForm register={register} errors={errors} />
       </div>

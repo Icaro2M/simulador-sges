@@ -6,6 +6,10 @@ import type {
   SimulationRequest,
   SimulationResponse,
 } from "../types/simulation";
+import {
+  buildTechnologyScenarioPayload,
+  calculateTechnologyPreview,
+} from "../utils/technologyModel";
 
 function completeChargingCostFields(
   response: SimulationResponse,
@@ -39,6 +43,9 @@ function completeChargingCostFields(
 
 export function useSimulation() {
   const [result, setResult] = useState<SimulationResponse | null>(null);
+  const [lastPreview, setLastPreview] = useState<ReturnType<
+    typeof calculateTechnologyPreview
+  > | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -46,10 +53,13 @@ export function useSimulation() {
     try {
       setIsLoading(true);
       setErrorMessage(null);
+      const payload = buildTechnologyScenarioPayload(data);
+      const preview = calculateTechnologyPreview(payload);
+      setLastPreview(preview);
 
       const response = completeChargingCostFields(
-        await simulateScenario(data),
-        data
+        await simulateScenario(payload),
+        payload
       );
       setResult(response);
       return response;
@@ -74,11 +84,13 @@ export function useSimulation() {
 
   function clearResult() {
     setResult(null);
+    setLastPreview(null);
     setErrorMessage(null);
   }
 
   return {
     result,
+    lastPreview,
     isLoading,
     errorMessage,
     runSimulation,

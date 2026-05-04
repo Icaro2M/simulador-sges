@@ -34,3 +34,7 @@ class SimulationResult:
     annual_charging_energy_cost: float
     annual_lcos_cost: float
     lcos_result: LcosResult | None
+    base_capex: float = 0.0
+    technology_specific_capex: float = 0.0
+    tower_structure_cost: float = 0.0
+    shaft_rehabilitation_cost: float = 0.0

@@ -16,16 +16,23 @@ class ShaftSGES(GravityStorageTechnology):
     nominal_power_kw: float | None = None
     charge_power_kw: float | None = None
     discharge_power_kw: float | None = None
+    usable_depth_fraction: float = 1.0
+    shaft_rehabilitation_cost: float = 0.0
+    material_density_kg_m3: float | None = None
+    container_volume_m3: float | None = None
     loss_model: LossModel = LossModel()
 
     def simulate(self) -> TechnologyResult:
         charge_power_kw, discharge_power_kw = self._resolve_power_limits()
         nominal_power_kw = max(charge_power_kw, discharge_power_kw)
+        effective_mass_kg = self._resolve_effective_mass()
+        usable_depth_m = self._resolve_usable_depth()
+        shaft_rehabilitation_cost = self._resolve_rehabilitation_cost()
 
         energy = calculate_potential_energy(
             PotentialEnergyInput(
-                mass_kg=self.mass_kg,
-                height_m=self.depth_m,
+                mass_kg=effective_mass_kg,
+                height_m=usable_depth_m,
             )
         )
 
@@ -58,6 +65,10 @@ class ShaftSGES(GravityStorageTechnology):
             discharge_power_kw=discharge_power_kw,
             charge_time_h=charge_time_h,
             discharge_time_h=discharge_time_h,
+            effective_mass_kg=effective_mass_kg,
+            usable_depth_m=usable_depth_m,
+            shaft_rehabilitation_cost=shaft_rehabilitation_cost,
+            technology_specific_capex=shaft_rehabilitation_cost,
         )
 
     def _resolve_power_limits(self) -> tuple[float, float]:
@@ -71,3 +82,43 @@ class ShaftSGES(GravityStorageTechnology):
             raise InvalidParameterError("discharge_power_kw must be greater than zero")
 
         return charge_power_kw, discharge_power_kw
+
+    def _resolve_effective_mass(self) -> float:
+        has_density = self.material_density_kg_m3 is not None
+        has_volume = self.container_volume_m3 is not None
+
+        if has_density != has_volume:
+            raise InvalidParameterError(
+                "material_density_kg_m3 and container_volume_m3 must be provided together"
+            )
+
+        if has_density and has_volume:
+            if self.material_density_kg_m3 is None or self.material_density_kg_m3 <= 0:
+                raise InvalidParameterError(
+                    "material_density_kg_m3 must be greater than zero"
+                )
+
+            if self.container_volume_m3 is None or self.container_volume_m3 <= 0:
+                raise InvalidParameterError(
+                    "container_volume_m3 must be greater than zero"
+                )
+
+            return self.material_density_kg_m3 * self.container_volume_m3
+
+        return self.mass_kg
+
+    def _resolve_usable_depth(self) -> float:
+        if not 0 < self.usable_depth_fraction <= 1:
+            raise InvalidParameterError(
+                "usable_depth_fraction must be greater than zero and less than or equal to one"
+            )
+
+        return self.depth_m * self.usable_depth_fraction
+
+    def _resolve_rehabilitation_cost(self) -> float:
+        if self.shaft_rehabilitation_cost < 0:
+            raise InvalidParameterError(
+                "shaft_rehabilitation_cost must be greater than or equal to zero"
+            )
+
+        return self.shaft_rehabilitation_cost

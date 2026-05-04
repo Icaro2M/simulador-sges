@@ -12,6 +12,14 @@ class SimulationRequest(BaseModel):
     nominal_power_kw: float | None = Field(default=None, gt=0)
     charge_power_kw: float | None = Field(default=None, gt=0)
     discharge_power_kw: float | None = Field(default=None, gt=0)
+    block_count: int | None = Field(default=None, gt=0)
+    mass_per_block_kg: float | None = Field(default=None, gt=0)
+    usable_height_fraction: float = Field(default=1.0, gt=0, le=1)
+    structure_cost_per_meter: float = Field(default=0.0, ge=0)
+    usable_depth_fraction: float = Field(default=1.0, gt=0, le=1)
+    shaft_rehabilitation_cost: float = Field(default=0.0, ge=0)
+    material_density_kg_m3: float | None = Field(default=None, gt=0)
+    container_volume_m3: float | None = Field(default=None, gt=0)
 
     charge_efficiency: float = Field(gt=0, le=1)
     discharge_efficiency: float = Field(gt=0, le=1)
@@ -49,6 +57,18 @@ class SimulationRequest(BaseModel):
 
         if self.nominal_power_kw is None:
             self.nominal_power_kw = max(self.charge_power_kw, self.discharge_power_kw)
+
+        if (self.block_count is None) != (self.mass_per_block_kg is None):
+            raise ValueError(
+                "block_count and mass_per_block_kg must be provided together"
+            )
+
+        if (self.material_density_kg_m3 is None) != (
+            self.container_volume_m3 is None
+        ):
+            raise ValueError(
+                "material_density_kg_m3 and container_volume_m3 must be provided together"
+            )
 
         if (
             self.replacement_year is not None

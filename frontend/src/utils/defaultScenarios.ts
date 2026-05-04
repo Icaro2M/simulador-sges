@@ -12,6 +12,10 @@ export function createDefaultScenario(
     nominal_power_kw: 500,
     charge_power_kw: 500,
     discharge_power_kw: 500,
+    usable_height_fraction: 1,
+    structure_cost_per_meter: 0,
+    usable_depth_fraction: 1,
+    shaft_rehabilitation_cost: 0,
 
     charge_efficiency: 0.9,
     discharge_efficiency: 0.9,

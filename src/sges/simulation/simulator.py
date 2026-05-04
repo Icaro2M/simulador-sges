@@ -76,10 +76,12 @@ class SGESSimulator:
             fixed_cost=scenario.economics.fixed_capex,
         )
 
-        initial_capex = capex_model.calculate(
+        base_capex = capex_model.calculate(
             nominal_power_kw=technology_result.nominal_power_kw,
             storage_capacity_kwh=technology_result.stored_energy_kwh,
         )
+        technology_specific_capex = technology_result.technology_specific_capex
+        initial_capex = base_capex + technology_specific_capex
 
         opex_model = OpexModel(
             fixed_annual_cost=scenario.economics.fixed_annual_opex,
@@ -159,6 +161,10 @@ class SGESSimulator:
             replacement_cost=scenario.economics.replacement_cost,
             replacement_year=scenario.economics.replacement_year,
             end_of_life_cost=scenario.economics.end_of_life_cost,
+            base_capex=base_capex,
+            technology_specific_capex=technology_specific_capex,
+            tower_structure_cost=technology_result.tower_structure_cost,
+            shaft_rehabilitation_cost=technology_result.shaft_rehabilitation_cost,
             annual_opex=annual_opex,
             annual_discharged_energy_mwh=annual_discharged_energy_mwh,
             annual_charging_energy_mwh=annual_charging_energy_mwh,
@@ -187,6 +193,10 @@ class SGESSimulator:
                 nominal_power_kw=technology.nominal_power_kw,
                 charge_power_kw=technology.charge_power_kw,
                 discharge_power_kw=technology.discharge_power_kw,
+                block_count=technology.block_count,
+                mass_per_block_kg=technology.mass_per_block_kg,
+                usable_height_fraction=technology.usable_height_fraction,
+                structure_cost_per_meter=technology.structure_cost_per_meter,
                 loss_model=loss_model,
             )
 
@@ -199,6 +209,10 @@ class SGESSimulator:
                 nominal_power_kw=technology.nominal_power_kw,
                 charge_power_kw=technology.charge_power_kw,
                 discharge_power_kw=technology.discharge_power_kw,
+                usable_depth_fraction=technology.usable_depth_fraction,
+                shaft_rehabilitation_cost=technology.shaft_rehabilitation_cost,
+                material_density_kg_m3=technology.material_density_kg_m3,
+                container_volume_m3=technology.container_volume_m3,
                 loss_model=loss_model,
             )
 

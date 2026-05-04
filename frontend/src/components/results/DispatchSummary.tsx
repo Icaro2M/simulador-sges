@@ -3,6 +3,7 @@ import type {
   DispatchSummary as DispatchSummaryData,
 } from "../../types/dispatch";
 import { normalizeDispatchResults } from "../../utils/dispatchResult";
+import { formatCurrency } from "../../utils/formatters";
 
 interface Props {
   data: DispatchResultItem[];
@@ -41,6 +42,27 @@ function getSummaryNumber(
   return fallback;
 }
 
+function getOptionalSummaryNumber(
+  summary: DispatchSummaryData | undefined,
+  key: string
+) {
+  const value = summary?.[key];
+
+  if (typeof value === "number" && !Number.isNaN(value)) {
+    return value;
+  }
+
+  return undefined;
+}
+
+function formatOptionalNumber(value: number | undefined, unit?: string) {
+  if (value === undefined) {
+    return "-";
+  }
+
+  return unit ? `${formatNumber(value)} ${unit}` : formatNumber(value);
+}
+
 export function DispatchSummary({ data, summary }: Props) {
   const normalizedData = normalizeDispatchResults(data);
 
@@ -77,9 +99,51 @@ export function DispatchSummary({ data, summary }: Props) {
   ).length;
   const standbyHours = normalizedData.filter((item) => item.action === "standby")
     .length;
+  const usableHeight = getOptionalSummaryNumber(summary, "usable_height_m");
+  const usableDepth = getOptionalSummaryNumber(summary, "usable_depth_m");
+  const technologySpecificCapex = getOptionalSummaryNumber(
+    summary,
+    "technology_specific_capex"
+  );
+  const initialCapex = getOptionalSummaryNumber(summary, "initial_capex");
 
   return (
     <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <SummaryCard
+        title="Capacidade fisica usada"
+        value={formatOptionalNumber(
+          getOptionalSummaryNumber(summary, "storage_capacity_kwh"),
+          "kWh"
+        )}
+      />
+
+      <SummaryCard
+        title="Massa efetiva usada"
+        value={formatOptionalNumber(
+          getOptionalSummaryNumber(summary, "effective_mass_kg"),
+          "kg"
+        )}
+      />
+
+      <SummaryCard
+        title={usableDepth !== undefined ? "Profundidade util" : "Altura util"}
+        value={formatOptionalNumber(usableDepth ?? usableHeight, "m")}
+      />
+
+      <SummaryCard
+        title="CAPEX especifico"
+        value={
+          technologySpecificCapex === undefined
+            ? "-"
+            : formatCurrency(technologySpecificCapex)
+        }
+      />
+
+      <SummaryCard
+        title="CAPEX inicial"
+        value={initialCapex === undefined ? "-" : formatCurrency(initialCapex)}
+      />
+
       <SummaryCard
         title="Carga da rede"
         value={`${formatNumber(
@@ -125,21 +189,21 @@ export function DispatchSummary({ data, summary }: Props) {
 
       <SummaryCard
         title="Receita total"
-        value={formatNumber(
+        value={formatCurrency(
           getSummaryNumber(summary, "total_revenue", totalRevenue)
         )}
       />
 
       <SummaryCard
         title="Custo de carga"
-        value={formatNumber(
+        value={formatCurrency(
           getSummaryNumber(summary, "total_charge_cost", totalCost)
         )}
       />
 
       <SummaryCard
         title="Lucro liquido"
-        value={formatNumber(
+        value={formatCurrency(
           getSummaryNumber(summary, "net_profit", totalNetCashflow)
         )}
       />

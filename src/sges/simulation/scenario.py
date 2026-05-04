@@ -13,6 +13,14 @@ class TechnologyScenario:
     nominal_power_kw: float | None = None
     charge_power_kw: float | None = None
     discharge_power_kw: float | None = None
+    block_count: int | None = None
+    mass_per_block_kg: float | None = None
+    usable_height_fraction: float = 1.0
+    structure_cost_per_meter: float = 0.0
+    usable_depth_fraction: float = 1.0
+    shaft_rehabilitation_cost: float = 0.0
+    material_density_kg_m3: float | None = None
+    container_volume_m3: float | None = None
 
 
 @dataclass(frozen=True)

@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Simulator for Solid Gravity Energy Storage systems"
 requires-python = ">=3.11"
 dependencies = [
+    "fastapi>=0.136",
     "numpy>=1.26",
     "pandas>=2.2",
     "pydantic>=2.7",

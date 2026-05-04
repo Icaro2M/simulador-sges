@@ -77,11 +77,42 @@ export function SimulationResult({ response }: SimulationResultProps) {
   const annualDischargedEnergyBeforeAvailabilityMwh =
     result.annual_discharged_energy_before_availability_mwh ??
     result.annual_discharged_energy_mwh;
+  const technologySpecificCapex =
+    result.technology_specific_capex ??
+    technology.technology_specific_capex ??
+    0;
+  const towerStructureCost =
+    result.tower_structure_cost ?? technology.tower_structure_cost ?? 0;
+  const shaftRehabilitationCost =
+    result.shaft_rehabilitation_cost ??
+    technology.shaft_rehabilitation_cost ??
+    0;
 
   const technicalRows = [
     {
       label: "Tecnologia",
       value: technology.technology_name,
+    },
+    {
+      label: "Massa efetiva usada",
+      value: technology.effective_mass_kg
+        ? formatNumber(technology.effective_mass_kg)
+        : "-",
+      unit: technology.effective_mass_kg ? "kg" : undefined,
+    },
+    {
+      label: "Altura util",
+      value: technology.usable_height_m
+        ? formatNumber(technology.usable_height_m)
+        : "-",
+      unit: technology.usable_height_m ? "m" : undefined,
+    },
+    {
+      label: "Profundidade util",
+      value: technology.usable_depth_m
+        ? formatNumber(technology.usable_depth_m)
+        : "-",
+      unit: technology.usable_depth_m ? "m" : undefined,
     },
     {
       label: "Energia potencial máxima",
@@ -197,6 +228,25 @@ export function SimulationResult({ response }: SimulationResultProps) {
   ];
 
   const economicRows = [
+    {
+      label: "CAPEX base",
+      value:
+        result.base_capex !== undefined
+          ? formatCurrency(result.base_capex)
+          : "-",
+    },
+    {
+      label: "CAPEX especifico da tecnologia",
+      value: formatCurrency(technologySpecificCapex),
+    },
+    {
+      label: "Custo estrutural da torre",
+      value: formatCurrency(towerStructureCost),
+    },
+    {
+      label: "Custo de reabilitacao do poco",
+      value: formatCurrency(shaftRehabilitationCost),
+    },
     {
       label: "CAPEX inicial",
       value: formatCurrency(result.initial_capex),

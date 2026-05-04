@@ -16,16 +16,23 @@ class TowerSGES(GravityStorageTechnology):
     nominal_power_kw: float | None = None
     charge_power_kw: float | None = None
     discharge_power_kw: float | None = None
+    block_count: int | None = None
+    mass_per_block_kg: float | None = None
+    usable_height_fraction: float = 1.0
+    structure_cost_per_meter: float = 0.0
     loss_model: LossModel = LossModel()
 
     def simulate(self) -> TechnologyResult:
         charge_power_kw, discharge_power_kw = self._resolve_power_limits()
         nominal_power_kw = max(charge_power_kw, discharge_power_kw)
+        effective_mass_kg = self._resolve_effective_mass()
+        usable_height_m = self._resolve_usable_height()
+        tower_structure_cost = self._calculate_structure_cost()
 
         energy = calculate_potential_energy(
             PotentialEnergyInput(
-                mass_kg=self.mass_kg,
-                height_m=self.height_m,
+                mass_kg=effective_mass_kg,
+                height_m=usable_height_m,
             )
         )
 
@@ -58,6 +65,10 @@ class TowerSGES(GravityStorageTechnology):
             discharge_power_kw=discharge_power_kw,
             charge_time_h=charge_time_h,
             discharge_time_h=discharge_time_h,
+            effective_mass_kg=effective_mass_kg,
+            usable_height_m=usable_height_m,
+            tower_structure_cost=tower_structure_cost,
+            technology_specific_capex=tower_structure_cost,
         )
 
     def _resolve_power_limits(self) -> tuple[float, float]:
@@ -71,3 +82,41 @@ class TowerSGES(GravityStorageTechnology):
             raise InvalidParameterError("discharge_power_kw must be greater than zero")
 
         return charge_power_kw, discharge_power_kw
+
+    def _resolve_effective_mass(self) -> float:
+        has_block_count = self.block_count is not None
+        has_mass_per_block = self.mass_per_block_kg is not None
+
+        if has_block_count != has_mass_per_block:
+            raise InvalidParameterError(
+                "block_count and mass_per_block_kg must be provided together"
+            )
+
+        if has_block_count and has_mass_per_block:
+            if self.block_count is None or self.block_count <= 0:
+                raise InvalidParameterError("block_count must be greater than zero")
+
+            if self.mass_per_block_kg is None or self.mass_per_block_kg <= 0:
+                raise InvalidParameterError(
+                    "mass_per_block_kg must be greater than zero"
+                )
+
+            return self.block_count * self.mass_per_block_kg
+
+        return self.mass_kg
+
+    def _resolve_usable_height(self) -> float:
+        if not 0 < self.usable_height_fraction <= 1:
+            raise InvalidParameterError(
+                "usable_height_fraction must be greater than zero and less than or equal to one"
+            )
+
+        return self.height_m * self.usable_height_fraction
+
+    def _calculate_structure_cost(self) -> float:
+        if self.structure_cost_per_meter < 0:
+            raise InvalidParameterError(
+                "structure_cost_per_meter must be greater than or equal to zero"
+            )
+
+        return self.structure_cost_per_meter * self.height_m

@@ -125,12 +125,13 @@ export function ComparisonPage() {
 
           <div className="grid gap-8">
             {fields.map((field, index) => (
-              <ComparisonScenarioForm
-                key={field.id}
-                index={index}
-                register={register}
-                errors={errors.scenarios?.[index]}
-                canRemove={fields.length > 2}
+            <ComparisonScenarioForm
+              key={field.id}
+              index={index}
+              register={register}
+              control={control}
+              errors={errors.scenarios?.[index]}
+              canRemove={fields.length > 2}
                 onRemove={() => remove(index)}
               />
             ))}

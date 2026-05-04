@@ -65,6 +65,112 @@ def test_simulator_energy_positive():
     assert result.technology_result.delivered_energy_kwh > 0
 
 
+def test_tower_uses_blocks_and_usable_height_when_provided():
+    simulator = SGESSimulator()
+    scenario = create_test_scenario()
+    tower_scenario = replace(
+        scenario,
+        technology=replace(
+            scenario.technology,
+            block_count=4,
+            mass_per_block_kg=25000,
+            usable_height_fraction=0.8,
+            structure_cost_per_meter=1000,
+        ),
+    )
+
+    result = simulator.run(tower_scenario)
+    technology = result.technology_result
+
+    assert technology.effective_mass_kg == pytest.approx(100000)
+    assert technology.usable_height_m == pytest.approx(40)
+    assert technology.max_potential_energy_kwh == pytest.approx(
+        (100000 * 9.80665 * 40) / 3_600_000
+    )
+    assert technology.tower_structure_cost == pytest.approx(50000)
+    assert result.technology_specific_capex == pytest.approx(50000)
+    assert result.initial_capex == pytest.approx(result.base_capex + 50000)
+
+
+def test_shaft_uses_density_volume_and_usable_depth_when_provided():
+    simulator = SGESSimulator()
+    scenario = create_test_scenario()
+    shaft_scenario = replace(
+        scenario,
+        technology=replace(
+            scenario.technology,
+            type="shaft",
+            material_density_kg_m3=2500,
+            container_volume_m3=40,
+            usable_depth_fraction=0.5,
+            shaft_rehabilitation_cost=75000,
+        ),
+    )
+
+    result = simulator.run(shaft_scenario)
+    technology = result.technology_result
+
+    assert technology.effective_mass_kg == pytest.approx(100000)
+    assert technology.usable_depth_m == pytest.approx(25)
+    assert technology.max_potential_energy_kwh == pytest.approx(
+        (100000 * 9.80665 * 25) / 3_600_000
+    )
+    assert technology.shaft_rehabilitation_cost == pytest.approx(75000)
+    assert result.technology_specific_capex == pytest.approx(75000)
+    assert result.initial_capex == pytest.approx(result.base_capex + 75000)
+
+
+def test_tower_legacy_mass_and_height_are_preserved_without_new_fields():
+    simulator = SGESSimulator()
+    scenario = create_test_scenario()
+
+    result = simulator.run(scenario)
+    technology = result.technology_result
+
+    assert technology.effective_mass_kg == pytest.approx(scenario.technology.mass_kg)
+    assert technology.usable_height_m == pytest.approx(scenario.technology.height_m)
+    assert technology.max_potential_energy_kwh == pytest.approx(
+        (scenario.technology.mass_kg * 9.80665 * scenario.technology.height_m)
+        / 3_600_000
+    )
+    assert result.technology_specific_capex == 0
+    assert result.initial_capex == pytest.approx(result.base_capex)
+
+
+def test_technology_specific_inputs_are_validated():
+    simulator = SGESSimulator()
+    scenario = create_test_scenario()
+
+    with pytest.raises(InvalidParameterError, match="usable_height_fraction"):
+        simulator.run(
+            replace(
+                scenario,
+                technology=replace(scenario.technology, usable_height_fraction=0),
+            )
+        )
+
+    with pytest.raises(InvalidParameterError, match="provided together"):
+        simulator.run(
+            replace(
+                scenario,
+                technology=replace(scenario.technology, block_count=2),
+            )
+        )
+
+    with pytest.raises(InvalidParameterError, match="material_density"):
+        simulator.run(
+            replace(
+                scenario,
+                technology=replace(
+                    scenario.technology,
+                    type="shaft",
+                    material_density_kg_m3=-2500,
+                    container_volume_m3=40,
+                ),
+            )
+        )
+
+
 def test_nominal_power_is_used_as_legacy_power_limit():
     simulator = SGESSimulator()
     scenario = create_test_scenario()

@@ -101,36 +101,6 @@ export function DashboardPage() {
       subtitle="Visão geral dos resultados e módulos do SGES Simulator"
     >
       <div className="space-y-8">
-        <Panel title="Status do sistema">
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <strong className="block text-sm font-semibold text-slate-950">
-                Backend
-              </strong>
-              <span className="mt-1 block text-sm text-slate-500">
-                API configurada
-              </span>
-            </div>
-
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <strong className="block text-sm font-semibold text-slate-950">
-                Módulos disponíveis
-              </strong>
-              <span className="mt-1 block text-sm text-slate-500">
-                Simulação, Comparação, Sensibilidade, Monte Carlo
-              </span>
-            </div>
-
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <strong className="block text-sm font-semibold text-slate-950">
-                Próximo módulo
-              </strong>
-              <span className="mt-1 block text-sm text-slate-500">
-                Dispatch energético
-              </span>
-            </div>
-          </div>
-        </Panel>
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <DashboardMetricCard
