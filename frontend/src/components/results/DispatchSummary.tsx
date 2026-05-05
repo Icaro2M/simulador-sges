@@ -1,8 +1,13 @@
-import type { DispatchResultItem } from "../../types/dispatch";
+import type {
+  DispatchResultItem,
+  DispatchSummary as DispatchSummaryData,
+} from "../../types/dispatch";
 import { normalizeDispatchResults } from "../../utils/dispatchResult";
+import { formatCurrency } from "../../utils/formatters";
 
 interface Props {
   data: DispatchResultItem[];
+  summary?: DispatchSummaryData;
 }
 
 function formatNumber(value: number, digits = 2) {
@@ -23,46 +28,205 @@ function SummaryCard({ title, value }: { title: string; value: string }) {
   );
 }
 
-export function DispatchSummary({ data }: Props) {
+function getSummaryNumber(
+  summary: DispatchSummaryData | undefined,
+  key: string,
+  fallback: number
+) {
+  const value = summary?.[key];
+
+  if (typeof value === "number" && !Number.isNaN(value)) {
+    return value;
+  }
+
+  return fallback;
+}
+
+function getOptionalSummaryNumber(
+  summary: DispatchSummaryData | undefined,
+  key: string
+) {
+  const value = summary?.[key];
+
+  if (typeof value === "number" && !Number.isNaN(value)) {
+    return value;
+  }
+
+  return undefined;
+}
+
+function formatOptionalNumber(value: number | undefined, unit?: string) {
+  if (value === undefined) {
+    return "-";
+  }
+
+  return unit ? `${formatNumber(value)} ${unit}` : formatNumber(value);
+}
+
+export function DispatchSummary({ data, summary }: Props) {
   const normalizedData = normalizeDispatchResults(data);
 
   const totalChargedEnergy = normalizedData.reduce(
     (sum, item) => sum + item.charged_energy_kwh,
     0
   );
-
+  const totalStoredEnergy = normalizedData.reduce(
+    (sum, item) => sum + item.stored_energy_kwh,
+    0
+  );
   const totalDischargedEnergy = normalizedData.reduce(
     (sum, item) => sum + item.discharged_energy_kwh,
     0
   );
-
-  const maxSoc = normalizedData.reduce(
-    (maxValue, item) => Math.max(maxValue, item.soc_kwh),
+  const totalStandbyLoss = normalizedData.reduce(
+    (sum, item) => sum + item.standby_loss_kwh,
     0
   );
-
+  const totalCost = normalizedData.reduce((sum, item) => sum + item.cost, 0);
+  const totalRevenue = normalizedData.reduce(
+    (sum, item) => sum + item.revenue,
+    0
+  );
   const totalNetCashflow = normalizedData.reduce(
     (sum, item) => sum + item.net_cashflow,
     0
   );
+  const finalSoc = normalizedData.at(-1)?.soc_final_kwh ?? 0;
+  const chargeHours = normalizedData.filter((item) => item.action === "charge")
+    .length;
+  const dischargeHours = normalizedData.filter(
+    (item) => item.action === "discharge"
+  ).length;
+  const standbyHours = normalizedData.filter((item) => item.action === "standby")
+    .length;
+  const usableHeight = getOptionalSummaryNumber(summary, "usable_height_m");
+  const usableDepth = getOptionalSummaryNumber(summary, "usable_depth_m");
+  const technologySpecificCapex = getOptionalSummaryNumber(
+    summary,
+    "technology_specific_capex"
+  );
+  const initialCapex = getOptionalSummaryNumber(summary, "initial_capex");
 
   return (
     <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       <SummaryCard
-        title="Energia carregada"
-        value={`${formatNumber(totalChargedEnergy)} kWh`}
+        title="Capacidade fisica usada"
+        value={formatOptionalNumber(
+          getOptionalSummaryNumber(summary, "storage_capacity_kwh"),
+          "kWh"
+        )}
       />
 
       <SummaryCard
-        title="Energia descarregada"
-        value={`${formatNumber(totalDischargedEnergy)} kWh`}
+        title="Massa efetiva usada"
+        value={formatOptionalNumber(
+          getOptionalSummaryNumber(summary, "effective_mass_kg"),
+          "kg"
+        )}
       />
 
-      <SummaryCard title="Maior SOC" value={`${formatNumber(maxSoc)} kWh`} />
+      <SummaryCard
+        title={usableDepth !== undefined ? "Profundidade util" : "Altura util"}
+        value={formatOptionalNumber(usableDepth ?? usableHeight, "m")}
+      />
 
       <SummaryCard
-        title="Fluxo líquido total"
-        value={formatNumber(totalNetCashflow)}
+        title="CAPEX especifico"
+        value={
+          technologySpecificCapex === undefined
+            ? "-"
+            : formatCurrency(technologySpecificCapex)
+        }
+      />
+
+      <SummaryCard
+        title="CAPEX inicial"
+        value={initialCapex === undefined ? "-" : formatCurrency(initialCapex)}
+      />
+
+      <SummaryCard
+        title="Carga da rede"
+        value={`${formatNumber(
+          getSummaryNumber(
+            summary,
+            "total_energy_charged_from_grid_kwh",
+            totalChargedEnergy
+          )
+        )} kWh`}
+      />
+
+      <SummaryCard
+        title="Energia armazenada"
+        value={`${formatNumber(
+          getSummaryNumber(summary, "total_energy_stored_kwh", totalStoredEnergy)
+        )} kWh`}
+      />
+
+      <SummaryCard
+        title="Energia entregue"
+        value={`${formatNumber(
+          getSummaryNumber(
+            summary,
+            "total_energy_discharged_to_grid_kwh",
+            totalDischargedEnergy
+          )
+        )} kWh`}
+      />
+
+      <SummaryCard
+        title="Perdas standby"
+        value={`${formatNumber(
+          getSummaryNumber(summary, "total_standby_loss_kwh", totalStandbyLoss)
+        )} kWh`}
+      />
+
+      <SummaryCard
+        title="SOC final"
+        value={`${formatNumber(
+          getSummaryNumber(summary, "final_soc_kwh", finalSoc)
+        )} kWh`}
+      />
+
+      <SummaryCard
+        title="Receita total"
+        value={formatCurrency(
+          getSummaryNumber(summary, "total_revenue", totalRevenue)
+        )}
+      />
+
+      <SummaryCard
+        title="Custo de carga"
+        value={formatCurrency(
+          getSummaryNumber(summary, "total_charge_cost", totalCost)
+        )}
+      />
+
+      <SummaryCard
+        title="Lucro liquido"
+        value={formatCurrency(
+          getSummaryNumber(summary, "net_profit", totalNetCashflow)
+        )}
+      />
+
+      <SummaryCard
+        title="Horas carregando"
+        value={formatNumber(getSummaryNumber(summary, "charge_hours", chargeHours), 0)}
+      />
+
+      <SummaryCard
+        title="Horas descarregando"
+        value={formatNumber(
+          getSummaryNumber(summary, "discharge_hours", dischargeHours),
+          0
+        )}
+      />
+
+      <SummaryCard
+        title="Horas standby"
+        value={formatNumber(
+          getSummaryNumber(summary, "standby_hours", standbyHours),
+          0
+        )}
       />
     </section>
   );

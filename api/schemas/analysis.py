@@ -13,13 +13,23 @@ class ComparisonResultItem(BaseModel):
     scenario_name: str
     technology_name: str
     stored_energy_kwh: float
+    required_charge_energy_kwh: float
     delivered_energy_kwh: float
+    charge_efficiency: float
+    discharge_efficiency: float
     round_trip_efficiency: float
     nominal_power_kw: float
+    charge_power_kw: float
+    discharge_power_kw: float
     initial_capex: float
+    availability_factor: float
+    annual_discharged_energy_before_availability_mwh: float
+    replacement_cost: float
+    replacement_year: int | None
+    end_of_life_cost: float
     annual_opex: float
     annual_discharged_energy_mwh: float
-    lcos_per_mwh: float
+    lcos_per_mwh: float | None
 
 
 class ComparisonResponse(BaseModel):
@@ -38,7 +48,7 @@ class SensitivityRequest(BaseModel):
 class SensitivityResultItem(BaseModel):
     parameter: str
     value: float
-    lcos: float
+    lcos: float | None
     capex: float
     annual_energy_mwh: float
 
@@ -59,7 +69,7 @@ class MonteCarloRequest(BaseModel):
 class MonteCarloResultItem(BaseModel):
     iteration: int
     sampled_values: Dict[str, float]
-    lcos: float
+    lcos: float | None
     capex: float
     annual_energy_mwh: float
     round_trip_efficiency: float

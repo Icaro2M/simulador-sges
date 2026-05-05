@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import type { DefaultValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import type { SimulationRequest } from "../../types/simulation";
@@ -14,18 +15,22 @@ interface SimulationFormProps {
   isLoading?: boolean;
 }
 
-const defaultValues: SimulationRequest = {
+const defaultValues: DefaultValues<SimulationRequest> = {
   name: "Teste SGES Tower",
   technology_type: "tower",
 
   mass_kg: 10000,
   height_m: 100,
   nominal_power_kw: 500,
+  charge_power_kw: 500,
+  discharge_power_kw: 500,
+  usable_height_fraction: 1,
+  structure_cost_per_meter: 0,
+  usable_depth_fraction: 1,
+  shaft_rehabilitation_cost: 0,
 
-  motor_efficiency: 0.9,
-  generator_efficiency: 0.9,
-  mechanical_efficiency: 0.95,
-  auxiliary_efficiency: 1,
+  charge_efficiency: 0.9,
+  discharge_efficiency: 0.9,
 
   cycle_loss_fraction: 0.02,
   fixed_cycle_loss_kwh: 0,
@@ -36,10 +41,12 @@ const defaultValues: SimulationRequest = {
   fixed_capex: 50000,
   fixed_annual_opex: 10000,
   variable_opex_per_mwh: 5,
+  charging_energy_cost_per_mwh: 0,
 
   project_lifetime_years: 20,
   discount_rate: 0.08,
   cycles_per_year: 300,
+  availability_factor: 1,
 };
 
 export function SimulationForm({
@@ -48,6 +55,7 @@ export function SimulationForm({
 }: SimulationFormProps) {
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<SimulationRequest>({
@@ -59,7 +67,7 @@ export function SimulationForm({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid gap-6">
         <ScenarioForm register={register} errors={errors} />
-        <TechnologyForm register={register} errors={errors} />
+        <TechnologyForm register={register} control={control} errors={errors} />
         <LossesForm register={register} errors={errors} />
         <EconomicsForm register={register} errors={errors} />
       </div>

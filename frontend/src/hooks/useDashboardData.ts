@@ -12,6 +12,13 @@ const resultTypeLabels = {
   dispatch: "Dispatch",
 };
 
+function getEffectiveEnergy(item: {
+  delivered_energy_kwh?: number;
+  effective_delivered_energy_kwh?: number;
+}) {
+  return item.effective_delivered_energy_kwh ?? item.delivered_energy_kwh ?? null;
+}
+
 export function useDashboardData() {
   const [results, setResults] = useState(() => getStoredDashboardResults());
 
@@ -26,7 +33,7 @@ export function useDashboardData() {
       type: item.type,
       typeLabel: resultTypeLabels[item.type],
       lcos: item.lcos_per_mwh ?? null,
-      energy: item.delivered_energy_kwh ?? null,
+      energy: getEffectiveEnergy(item),
       efficiency:
         typeof item.rte === "number"
           ? item.rte * 100
@@ -55,7 +62,7 @@ export function useDashboardData() {
     );
 
     const resultsWithEnergy = results.filter(
-      (item) => typeof item.delivered_energy_kwh === "number"
+      (item) => typeof getEffectiveEnergy(item) === "number"
     );
 
     const resultsWithRte = results.filter(
@@ -70,7 +77,7 @@ export function useDashboardData() {
     const bestEnergy =
       resultsWithEnergy.length > 0
         ? Math.max(
-            ...resultsWithEnergy.map((item) => item.delivered_energy_kwh!)
+            ...resultsWithEnergy.map((item) => getEffectiveEnergy(item)!)
           )
         : null;
 

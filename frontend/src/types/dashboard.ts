@@ -13,6 +13,7 @@ export interface DashboardStoredResult {
 
   lcos_per_mwh?: number;
   delivered_energy_kwh?: number;
+  effective_delivered_energy_kwh?: number;
   rte?: number;
   capex?: number;
 }

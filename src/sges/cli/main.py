@@ -21,6 +21,13 @@ app = typer.Typer()
 console = Console()
 
 
+def _format_lcos(value: float | None) -> str:
+    if value is None:
+        return "undefined"
+
+    return f"${value:,.2f}/MWh"
+
+
 @app.command()
 def run(
     config: Path = Path("configs/tower_sges.yaml"),
@@ -73,7 +80,7 @@ def compare(
             f"{row.round_trip_efficiency:.2%}",
             f"${row.initial_capex:,.2f}",
             f"{row.annual_discharged_energy_mwh:,.2f} MWh",
-            f"${row.lcos_per_mwh:,.2f}/MWh",
+            _format_lcos(row.lcos_per_mwh),
         )
 
     console.print(table)
@@ -111,7 +118,7 @@ def sensitivity(
     for row in rows:
         table.add_row(
             f"{row['value']:.2f}",
-            f"${row['lcos']:,.2f}/MWh",
+            _format_lcos(row["lcos"]),
             f"${row['capex']:,.2f}",
             f"{row['annual_energy_mwh']:,.2f} MWh",
         )
@@ -135,11 +142,13 @@ def monte_carlo(
     parameter_ranges = {
         "technology.height_m": (50, 500),
         "technology.mass_kg": (300_000, 1_500_000),
-        "technology.motor_efficiency": (0.85, 0.95),
-        "technology.generator_efficiency": (0.85, 0.95),
-        "technology.mechanical_efficiency": (0.80, 0.95),
+        "technology.charge_power_kw": (300, 2500),
+        "technology.discharge_power_kw": (300, 2500),
+        "technology.charge_efficiency": (0.85, 0.95),
+        "technology.discharge_efficiency": (0.85, 0.95),
         "economics.cost_per_kw": (700, 1800),
         "economics.cost_per_kwh": (40, 150),
+        "economics.charging_energy_cost_per_mwh": (0, 100),
         "economics.cycles_per_year": (150, 500),
     }
 
@@ -150,20 +159,26 @@ def monte_carlo(
         seed=seed,
     )
 
-    best = min(rows, key=lambda row: row["lcos"])
-    worst = max(rows, key=lambda row: row["lcos"])
-    avg_lcos = sum(row["lcos"] for row in rows) / len(rows)
+    rows_with_lcos = [row for row in rows if row["lcos"] is not None]
+    best = min(rows_with_lcos, key=lambda row: row["lcos"]) if rows_with_lcos else None
+    worst = max(rows_with_lcos, key=lambda row: row["lcos"]) if rows_with_lcos else None
+    avg_lcos = (
+        sum(row["lcos"] for row in rows_with_lcos) / len(rows_with_lcos)
+        if rows_with_lcos
+        else None
+    )
 
     table = Table(title="Monte Carlo Analysis")
     table.add_column("Metric")
     table.add_column("Value")
 
     table.add_row("Iterations", str(iterations))
-    table.add_row("Average LCOS", f"${avg_lcos:,.2f}/MWh")
-    table.add_row("Best LCOS", f"${best['lcos']:,.2f}/MWh")
-    table.add_row("Worst LCOS", f"${worst['lcos']:,.2f}/MWh")
-    table.add_row("Best annual energy", f"{best['annual_energy_mwh']:,.2f} MWh")
-    table.add_row("Worst annual energy", f"{worst['annual_energy_mwh']:,.2f} MWh")
+    table.add_row("Average LCOS", _format_lcos(avg_lcos))
+    table.add_row("Best LCOS", _format_lcos(best["lcos"] if best is not None else None))
+    table.add_row("Worst LCOS", _format_lcos(worst["lcos"] if worst is not None else None))
+    if best is not None and worst is not None:
+        table.add_row("Best annual energy", f"{best['annual_energy_mwh']:,.2f} MWh")
+        table.add_row("Worst annual energy", f"{worst['annual_energy_mwh']:,.2f} MWh")
 
     console.print(table)
 
@@ -185,9 +200,11 @@ def dispatch(
     price_profile = load_time_series_csv(prices)
 
     loss_model = LossModel(
-        cycle_loss_fraction=scenario.losses.cycle_loss_fraction,
+        additional_cycle_loss_fraction=scenario.losses.additional_cycle_loss_fraction,
         fixed_cycle_loss_kwh=scenario.losses.fixed_cycle_loss_kwh,
-        standby_loss_kwh_per_hour=scenario.losses.standby_loss_kwh_per_hour,
+        standby_loss_stored_kwh_per_hour=(
+            scenario.losses.standby_loss_stored_kwh_per_hour
+        ),
     )
 
     dispatch_result = run_price_arbitrage_dispatch(
@@ -200,23 +217,39 @@ def dispatch(
         ),
     )
 
-    total_charged = dispatch_result["charged_kwh"].sum()
-    total_discharged = dispatch_result["discharged_kwh"].sum()
-    total_standby_loss = dispatch_result["standby_loss_kwh"].sum()
-    total_cost = dispatch_result["cost"].sum()
-    total_revenue = dispatch_result["revenue"].sum()
-    net_revenue = dispatch_result["net_revenue"].sum()
+    summary = dispatch_result.attrs.get("summary", {})
 
     table = Table(title="Dispatch Simulation")
     table.add_column("Metric")
     table.add_column("Value")
 
-    table.add_row("Total charged", f"{total_charged:,.2f} kWh")
-    table.add_row("Total discharged", f"{total_discharged:,.2f} kWh")
-    table.add_row("Standby losses", f"{total_standby_loss:,.2f} kWh")
-    table.add_row("Total cost", f"${total_cost:,.2f}")
-    table.add_row("Total revenue", f"${total_revenue:,.2f}")
-    table.add_row("Net revenue", f"${net_revenue:,.2f}")
+    table.add_row(
+        "Total charged from grid",
+        f"{summary.get('total_energy_charged_from_grid_kwh', 0):,.2f} kWh",
+    )
+    table.add_row(
+        "Total stored",
+        f"{summary.get('total_energy_stored_kwh', 0):,.2f} kWh",
+    )
+    table.add_row(
+        "Total delivered",
+        f"{summary.get('total_energy_discharged_to_grid_kwh', 0):,.2f} kWh",
+    )
+    table.add_row(
+        "Cycle losses",
+        f"{summary.get('total_cycle_loss_kwh', 0):,.2f} kWh",
+    )
+    table.add_row(
+        "Standby losses",
+        f"{summary.get('total_standby_loss_kwh', 0):,.2f} kWh",
+    )
+    table.add_row("Total cost", f"${summary.get('total_charge_cost', 0):,.2f}")
+    table.add_row("Total revenue", f"${summary.get('total_revenue', 0):,.2f}")
+    table.add_row("Net profit", f"${summary.get('net_profit', 0):,.2f}")
+    table.add_row("Final SOC", f"{summary.get('final_soc_kwh', 0):,.2f} kWh")
+    table.add_row("Charge hours", str(summary.get("charge_hours", 0)))
+    table.add_row("Discharge hours", str(summary.get("discharge_hours", 0)))
+    table.add_row("Standby hours", str(summary.get("standby_hours", 0)))
 
     console.print(table)
 
@@ -238,16 +271,85 @@ def _print_single_result(result):
     table.add_column("Value")
 
     table.add_row("Technology", result.technology_result.technology_name)
+    table.add_row(
+        "Input energy",
+        f"{result.technology_result.input_energy_kwh:,.2f} kWh",
+    )
+    table.add_row(
+        "Max potential energy",
+        f"{result.technology_result.max_potential_energy_kwh:,.2f} kWh",
+    )
     table.add_row("Stored energy", f"{result.technology_result.stored_energy_kwh:,.2f} kWh")
-    table.add_row("Delivered energy", f"{result.technology_result.delivered_energy_kwh:,.2f} kWh")
-    table.add_row("Round-trip efficiency", f"{result.technology_result.round_trip_efficiency:.2%}")
+    table.add_row(
+        "Required charge energy",
+        f"{result.technology_result.required_charge_energy_kwh:,.2f} kWh",
+    )
+    table.add_row("Technical delivered energy", f"{result.technology_result.delivered_energy_kwh:,.2f} kWh")
+    table.add_row("Available energy", f"{result.available_energy_kwh:,.2f} kWh")
+    table.add_row("Gross delivered energy", f"{result.gross_delivered_energy_kwh:,.2f} kWh")
+    table.add_row("Effective delivered energy", f"{result.effective_delivered_energy_kwh:,.2f} kWh")
+    table.add_row("Charge efficiency", f"{result.technology_result.charge_efficiency:.2%}")
+    table.add_row(
+        "Discharge efficiency",
+        f"{result.technology_result.discharge_efficiency:.2%}",
+    )
+    table.add_row("Technical round-trip efficiency", f"{result.technology_result.round_trip_efficiency:.2%}")
+    table.add_row("Effective round-trip efficiency", f"{result.effective_round_trip_efficiency:.2%}")
     table.add_row("Nominal power", f"{result.technology_result.nominal_power_kw:,.2f} kW")
+    table.add_row("Charge power", f"{result.technology_result.charge_power_kw:,.2f} kW")
+    table.add_row("Discharge power", f"{result.technology_result.discharge_power_kw:,.2f} kW")
     table.add_row("Charge time", f"{result.technology_result.charge_time_h:,.2f} h")
     table.add_row("Discharge time", f"{result.technology_result.discharge_time_h:,.2f} h")
+    table.add_row("Standby time per cycle", f"{result.standby_hours_per_cycle:,.2f} h")
+    table.add_row("Standby loss per cycle", f"{result.standby_loss_per_cycle_kwh:,.2f} kWh")
+    table.add_row("Standby output loss per cycle", f"{result.standby_output_loss_per_cycle_kwh:,.2f} kWh")
+    table.add_row("Fractional cycle loss", f"{result.fractional_cycle_loss_per_cycle_kwh:,.2f} kWh")
+    table.add_row("Fixed cycle loss", f"{result.fixed_cycle_loss_per_cycle_kwh:,.2f} kWh")
+    table.add_row("Cycle loss per cycle", f"{result.cycle_loss_per_cycle_kwh:,.2f} kWh")
+    table.add_row("Total loss per cycle", f"{result.total_loss_per_cycle_kwh:,.2f} kWh")
+    table.add_row("Annual standby loss", f"{result.annual_standby_loss_kwh:,.2f} kWh")
+    table.add_row("Annual discharged energy", f"{result.annual_discharged_energy_mwh:,.2f} MWh")
+    table.add_row("Annual charging energy", f"{result.annual_charging_energy_mwh:,.2f} MWh")
+    table.add_row("Annual charging cost", f"${result.annual_charging_energy_cost:,.2f}")
+    table.add_row("Annual LCOS cost", f"${result.annual_lcos_cost:,.2f}")
+    table.add_row("Replacement cost", f"${result.replacement_cost:,.2f}")
+    table.add_row(
+        "Replacement year",
+        str(result.replacement_year) if result.replacement_year is not None else "-",
+    )
+    table.add_row("End-of-life cost", f"${result.end_of_life_cost:,.2f}")
+    table.add_row("Status", result.status)
+    if result.warnings:
+        table.add_row("Warnings", " | ".join(result.warnings))
     table.add_row("Initial CAPEX", f"${result.initial_capex:,.2f}")
     table.add_row("Annual OPEX", f"${result.annual_opex:,.2f}")
     table.add_row("Annual discharged energy", f"{result.annual_discharged_energy_mwh:,.2f} MWh")
-    table.add_row("LCOS", f"${result.lcos_result.lcos_per_mwh:,.2f}/MWh")
+    table.add_row(
+        "Discounted replacement cost",
+        f"${result.lcos_result.discounted_replacement_cost:,.2f}"
+        if result.lcos_result is not None
+        else "-",
+    )
+    table.add_row(
+        "Discounted end-of-life cost",
+        f"${result.lcos_result.discounted_end_of_life_cost:,.2f}"
+        if result.lcos_result is not None
+        else "-",
+    )
+    table.add_row(
+        "Discounted LCOS cost",
+        f"${result.lcos_result.discounted_cost:,.2f}"
+        if result.lcos_result is not None
+        else "-",
+    )
+    table.add_row(
+        "LCOS",
+        _format_lcos(
+            result.lcos_result.lcos_per_mwh
+            if result.lcos_result is not None
+            else None
+        ),
+    )
 
     console.print(table)
 
@@ -264,9 +366,14 @@ def _export_comparison_csv(rows, output: Path):
                 "scenario_name",
                 "technology_name",
                 "stored_energy_kwh",
+                "required_charge_energy_kwh",
                 "delivered_energy_kwh",
+                "charge_efficiency",
+                "discharge_efficiency",
                 "round_trip_efficiency",
                 "nominal_power_kw",
+                "charge_power_kw",
+                "discharge_power_kw",
                 "initial_capex",
                 "annual_opex",
                 "annual_discharged_energy_mwh",
@@ -281,9 +388,14 @@ def _export_comparison_csv(rows, output: Path):
                     row.scenario_name,
                     row.technology_name,
                     row.stored_energy_kwh,
+                    row.required_charge_energy_kwh,
                     row.delivered_energy_kwh,
+                    row.charge_efficiency,
+                    row.discharge_efficiency,
                     row.round_trip_efficiency,
                     row.nominal_power_kw,
+                    row.charge_power_kw,
+                    row.discharge_power_kw,
                     row.initial_capex,
                     row.annual_opex,
                     row.annual_discharged_energy_mwh,
@@ -382,7 +494,7 @@ def batch(
             f"{row.round_trip_efficiency:.2%}",
             f"${row.initial_capex:,.2f}",
             f"{row.annual_discharged_energy_mwh:,.2f} MWh",
-            f"${row.lcos_per_mwh:,.2f}/MWh",
+            _format_lcos(row.lcos_per_mwh),
         )
 
     console.print(table)

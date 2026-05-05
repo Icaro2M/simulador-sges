@@ -44,7 +44,11 @@ def run_sensitivity(
             {
                 "parameter": parameter_path,
                 "value": value,
-                "lcos": result.lcos_result.lcos_per_mwh,
+                "lcos": (
+                    result.lcos_result.lcos_per_mwh
+                    if result.lcos_result is not None
+                    else None
+                ),
                 "capex": result.initial_capex,
                 "annual_energy_mwh": result.annual_discharged_energy_mwh,
             }

@@ -15,16 +15,28 @@ class ScenarioService:
                 type=request.technology_type,
                 mass_kg=request.mass_kg,
                 height_m=request.height_m,
+                charge_efficiency=request.charge_efficiency,
+                discharge_efficiency=request.discharge_efficiency,
                 nominal_power_kw=request.nominal_power_kw,
-                motor_efficiency=request.motor_efficiency,
-                generator_efficiency=request.generator_efficiency,
-                mechanical_efficiency=request.mechanical_efficiency,
-                auxiliary_efficiency=request.auxiliary_efficiency,
+                charge_power_kw=request.charge_power_kw,
+                discharge_power_kw=request.discharge_power_kw,
+                block_count=request.block_count,
+                mass_per_block_kg=request.mass_per_block_kg,
+                usable_height_fraction=request.usable_height_fraction,
+                structure_cost_per_meter=request.structure_cost_per_meter,
+                usable_depth_fraction=request.usable_depth_fraction,
+                shaft_rehabilitation_cost=request.shaft_rehabilitation_cost,
+                material_density_kg_m3=request.material_density_kg_m3,
+                container_volume_m3=request.container_volume_m3,
             ),
             losses=LossScenario(
-                cycle_loss_fraction=request.cycle_loss_fraction,
+                additional_cycle_loss_fraction=(
+                    request.additional_cycle_loss_fraction
+                ),
                 fixed_cycle_loss_kwh=request.fixed_cycle_loss_kwh,
-                standby_loss_kwh_per_hour=request.standby_loss_kwh_per_hour,
+                standby_loss_stored_kwh_per_hour=(
+                    request.standby_loss_stored_kwh_per_hour
+                ),
             ),
             economics=EconomicScenario(
                 cost_per_kw=request.cost_per_kw,
@@ -32,8 +44,13 @@ class ScenarioService:
                 fixed_capex=request.fixed_capex,
                 fixed_annual_opex=request.fixed_annual_opex,
                 variable_opex_per_mwh=request.variable_opex_per_mwh,
+                charging_energy_cost_per_mwh=request.charging_energy_cost_per_mwh,
                 project_lifetime_years=request.project_lifetime_years,
                 discount_rate=request.discount_rate,
                 cycles_per_year=request.cycles_per_year,
+                availability_factor=request.availability_factor,
+                replacement_cost=request.replacement_cost,
+                replacement_year=request.replacement_year,
+                end_of_life_cost=request.end_of_life_cost,
             ),
         )

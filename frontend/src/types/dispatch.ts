@@ -18,7 +18,12 @@ export interface DispatchResultItem {
   [key: string]: unknown;
 }
 
+export interface DispatchSummary {
+  [key: string]: unknown;
+}
+
 export interface DispatchResponse {
   success: boolean;
   results: DispatchResultItem[];
+  summary?: DispatchSummary;
 }

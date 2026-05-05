@@ -4,13 +4,23 @@ export interface ComparisonResultItem {
   scenario_name: string;
   technology_name: string;
   stored_energy_kwh: number;
+  required_charge_energy_kwh: number;
   delivered_energy_kwh: number;
+  charge_efficiency: number;
+  discharge_efficiency: number;
   round_trip_efficiency: number;
   nominal_power_kw: number;
+  charge_power_kw: number;
+  discharge_power_kw: number;
   initial_capex: number;
+  availability_factor: number;
+  annual_discharged_energy_before_availability_mwh: number;
+  replacement_cost: number;
+  replacement_year: number | null;
+  end_of_life_cost: number;
   annual_opex: number;
   annual_discharged_energy_mwh: number;
-  lcos_per_mwh: number;
+  lcos_per_mwh: number | null;
 }
 
 export interface ComparisonResponse {
@@ -29,7 +39,7 @@ export interface SensitivityRequest {
 export interface SensitivityResultItem {
   parameter: string;
   value: number;
-  lcos: number;
+  lcos: number | null;
   capex: number;
   annual_energy_mwh: number;
 }
@@ -50,7 +60,7 @@ export interface MonteCarloRequest {
 export interface MonteCarloResultItem {
   iteration: number;
   sampled_values: Record<string, number>;
-  lcos: number;
+  lcos: number | null;
   capex: number;
   annual_energy_mwh: number;
   round_trip_efficiency: number;

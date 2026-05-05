@@ -8,12 +8,13 @@ import type {
   SensitivityRequest,
   SensitivityResponse,
 } from "../types/analysis";
+import { buildTechnologyScenarioPayload } from "../utils/technologyModel";
 
 export async function compareScenarios(
   scenarios: SimulationRequest[]
 ): Promise<ComparisonResponse> {
   const response = await apiClient.post<ComparisonResponse>("/compare", {
-    scenarios,
+    scenarios: scenarios.map(buildTechnologyScenarioPayload),
   });
 
   return response.data;
@@ -24,7 +25,10 @@ export async function runSensitivityAnalysis(
 ): Promise<SensitivityResponse> {
   const response = await apiClient.post<SensitivityResponse>(
     "/sensitivity",
-    data
+    {
+      ...data,
+      base_scenario: buildTechnologyScenarioPayload(data.base_scenario),
+    }
   );
 
   return response.data;
@@ -35,7 +39,10 @@ export async function runMonteCarlo(
 ): Promise<MonteCarloResponse> {
   const response = await apiClient.post<MonteCarloResponse>(
     "/monte-carlo",
-    request
+    {
+      ...request,
+      base_scenario: buildTechnologyScenarioPayload(request.base_scenario),
+    }
   );
 
   return response.data;

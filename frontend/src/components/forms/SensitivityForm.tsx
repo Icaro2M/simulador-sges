@@ -54,6 +54,10 @@ export function SensitivityForm({ register, errors }: Props) {
               <option value="technology.height_m">Altura</option>
               <option value="technology.mass_kg">Massa</option>
               <option value="technology.nominal_power_kw">Potência nominal</option>
+              <option value="technology.charge_power_kw">Potência de carga</option>
+              <option value="technology.discharge_power_kw">Potência de descarga</option>
+              <option value="technology.charge_efficiency">Eficiência de carga</option>
+              <option value="technology.discharge_efficiency">Eficiência de descarga</option>
 
               <option value="economics.cost_per_kw">Custo por kW</option>
               <option value="economics.cost_per_kwh">Custo por kWh</option>
@@ -63,6 +67,22 @@ export function SensitivityForm({ register, errors }: Props) {
               </option>
               <option value="economics.variable_opex_per_mwh">
                 OPEX variável por MWh
+              </option>
+
+              <option value="economics.charging_energy_cost_per_mwh">
+                Custo da energia de carga
+              </option>
+              <option value="economics.availability_factor">
+                Disponibilidade operacional
+              </option>
+              <option value="economics.replacement_cost">
+                Custo de reposicao
+              </option>
+              <option value="economics.replacement_year">
+                Ano da reposicao
+              </option>
+              <option value="economics.end_of_life_cost">
+                Custo de fim de vida
               </option>
 
               <option value="losses.cycle_loss_fraction">Perda por ciclo</option>
@@ -140,7 +160,7 @@ export function SensitivityForm({ register, errors }: Props) {
         title="Parâmetros físicos"
         description="Base física para o cálculo energético."
       >
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <label className="grid gap-2 text-sm font-semibold text-slate-700">
             Massa (kg)
             <input
@@ -177,71 +197,70 @@ export function SensitivityForm({ register, errors }: Props) {
               message={errors.base_scenario?.nominal_power_kw?.message}
             />
           </label>
+
+          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            Potência de carga (kW)
+            <input
+              className={controlClass}
+              type="number"
+              step="any"
+              {...register("base_scenario.charge_power_kw", {
+                valueAsNumber: true,
+              })}
+            />
+            <FieldError
+              message={errors.base_scenario?.charge_power_kw?.message}
+            />
+          </label>
+
+          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            Potência de descarga (kW)
+            <input
+              className={controlClass}
+              type="number"
+              step="any"
+              {...register("base_scenario.discharge_power_kw", {
+                valueAsNumber: true,
+              })}
+            />
+            <FieldError
+              message={errors.base_scenario?.discharge_power_kw?.message}
+            />
+          </label>
         </div>
       </FormSection>
-
       <FormSection
         title="Eficiências"
-        description="Eficiências de conversão e recuperação."
+        description="Eficiências de carga e descarga."
       >
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2">
           <label className="grid gap-2 text-sm font-semibold text-slate-700">
-            Motor
+            Carga
             <input
               className={controlClass}
               type="number"
               step="any"
-              {...register("base_scenario.motor_efficiency", {
+              {...register("base_scenario.charge_efficiency", {
                 valueAsNumber: true,
               })}
             />
             <FieldError
-              message={errors.base_scenario?.motor_efficiency?.message}
+              message={errors.base_scenario?.charge_efficiency?.message}
             />
           </label>
 
           <label className="grid gap-2 text-sm font-semibold text-slate-700">
-            Gerador
+            Descarga
             <input
               className={controlClass}
               type="number"
               step="any"
-              {...register("base_scenario.generator_efficiency", {
+              {...register("base_scenario.discharge_efficiency", {
                 valueAsNumber: true,
               })}
             />
             <FieldError
-              message={errors.base_scenario?.generator_efficiency?.message}
-            />
-          </label>
-
-          <label className="grid gap-2 text-sm font-semibold text-slate-700">
-            Mecânica
-            <input
-              className={controlClass}
-              type="number"
-              step="any"
-              {...register("base_scenario.mechanical_efficiency", {
-                valueAsNumber: true,
-              })}
-            />
-            <FieldError
-              message={errors.base_scenario?.mechanical_efficiency?.message}
-            />
-          </label>
-
-          <label className="grid gap-2 text-sm font-semibold text-slate-700">
-            Auxiliar
-            <input
-              className={controlClass}
-              type="number"
-              step="any"
-              {...register("base_scenario.auxiliary_efficiency", {
-                valueAsNumber: true,
-              })}
-            />
-            <FieldError
-              message={errors.base_scenario?.auxiliary_efficiency?.message}
+              message={errors.base_scenario?.discharge_efficiency?.message}
             />
           </label>
         </div>
@@ -409,6 +428,65 @@ export function SensitivityForm({ register, errors }: Props) {
               })}
             />
             <FieldError message={errors.base_scenario?.cycles_per_year?.message} />
+          </label>
+
+          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            Disponibilidade operacional
+            <input
+              className={controlClass}
+              type="number"
+              step="any"
+              min="0"
+              max="1"
+              {...register("base_scenario.availability_factor", {
+                valueAsNumber: true,
+              })}
+            />
+            <FieldError
+              message={errors.base_scenario?.availability_factor?.message}
+            />
+          </label>
+
+          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            Custo de reposicao
+            <input
+              className={controlClass}
+              type="number"
+              step="any"
+              min="0"
+              {...register("base_scenario.replacement_cost", {
+                setValueAs: (value) => (value === "" ? undefined : Number(value)),
+              })}
+            />
+            <FieldError message={errors.base_scenario?.replacement_cost?.message} />
+          </label>
+
+          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            Ano da reposicao
+            <input
+              className={controlClass}
+              type="number"
+              step="1"
+              min="1"
+              {...register("base_scenario.replacement_year", {
+                setValueAs: (value) => (value === "" ? null : Number(value)),
+              })}
+            />
+            <FieldError message={errors.base_scenario?.replacement_year?.message} />
+          </label>
+
+          <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            Custo de fim de vida
+            <input
+              className={controlClass}
+              type="number"
+              step="any"
+              min="0"
+              {...register("base_scenario.end_of_life_cost", {
+                setValueAs: (value) => (value === "" ? undefined : Number(value)),
+              })}
+            />
+            <FieldError message={errors.base_scenario?.end_of_life_cost?.message} />
           </label>
         </div>
       </FormSection>

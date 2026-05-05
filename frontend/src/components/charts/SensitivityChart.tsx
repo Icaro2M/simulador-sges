@@ -25,7 +25,11 @@ const metricLabels: Record<SensitivityMetric, string> = {
   annual_energy_mwh: "Energia anual",
 };
 
-function formatMetricValue(value: number, metric: SensitivityMetric) {
+function formatMetricValue(value: number | null, metric: SensitivityMetric) {
+  if (value === null) {
+    return "Indefinido";
+  }
+
   if (metric === "lcos" || metric === "capex") {
     return formatCurrency(value);
   }
@@ -68,7 +72,12 @@ export function SensitivityChart({
             />
 
             <Tooltip
-              formatter={(value) => formatMetricValue(Number(value), metric)}
+              formatter={(value) =>
+                formatMetricValue(
+                  typeof value === "number" ? value : null,
+                  metric,
+                )
+              }
               labelFormatter={(label) => `${parameter}: ${formatNumber(label)}`}
             />
 

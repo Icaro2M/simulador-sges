@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import { useWatch } from "react-hook-form";
+import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 
 import type { SimulationRequest } from "../../types/simulation";
+import {
+  calculateTechnologyPreview,
+  formatTechnologyNumber,
+} from "../../utils/technologyModel";
 
 export interface ComparisonFormValues {
   scenarios: SimulationRequest[];
@@ -10,6 +15,7 @@ export interface ComparisonFormValues {
 interface Props {
   index: number;
   register: UseFormRegister<ComparisonFormValues>;
+  control: Control<ComparisonFormValues>;
   errors?: FieldErrors<SimulationRequest>;
   canRemove: boolean;
   onRemove: () => void;
@@ -47,15 +53,29 @@ function FormGroup({
   );
 }
 
+const optionalNumber = {
+  setValueAs: (value: string) => (value === "" ? undefined : Number(value)),
+};
+
 export function ComparisonScenarioForm({
   index,
   register,
+  control,
   errors,
   canRemove,
   onRemove,
 }: Props) {
   const title = `Cenário ${index + 1}`;
   const fieldPrefix = `scenarios.${index}` as const;
+  const technologyType = useWatch({
+    control,
+    name: `${fieldPrefix}.technology_type`,
+  });
+  const watchedScenario = useWatch({
+    control,
+    name: fieldPrefix,
+  }) as SimulationRequest;
+  const technologyPreview = calculateTechnologyPreview(watchedScenario);
 
   return (
     <article className="overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm">
@@ -113,9 +133,9 @@ export function ComparisonScenarioForm({
           title="Parâmetros físicos"
           description="Base física para energia armazenada e potência."
         >
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <label className="grid gap-2 text-sm font-semibold text-slate-700">
-              Massa (kg)
+              Massa base/fallback (kg)
               <input
                 className={controlClass}
                 type="number"
@@ -126,7 +146,7 @@ export function ComparisonScenarioForm({
             </label>
 
             <label className="grid gap-2 text-sm font-semibold text-slate-700">
-              Altura (m)
+              Altura/profundidade base (m)
               <input
                 className={controlClass}
                 type="number"
@@ -148,64 +168,229 @@ export function ComparisonScenarioForm({
               />
               <FieldError message={errors?.nominal_power_kw?.message} />
             </label>
+
+            <label className="grid gap-2 text-sm font-semibold text-slate-700">
+              Potência de carga (kW)
+              <input
+                className={controlClass}
+                type="number"
+                step="any"
+                {...register(`${fieldPrefix}.charge_power_kw`, {
+                  valueAsNumber: true,
+                })}
+              />
+              <FieldError message={errors?.charge_power_kw?.message} />
+            </label>
+
+            <label className="grid gap-2 text-sm font-semibold text-slate-700">
+              Potência de descarga (kW)
+              <input
+                className={controlClass}
+                type="number"
+                step="any"
+                {...register(`${fieldPrefix}.discharge_power_kw`, {
+                  valueAsNumber: true,
+                })}
+              />
+              <FieldError message={errors?.discharge_power_kw?.message} />
+            </label>
           </div>
         </FormGroup>
+        <FormGroup
+          title="Modelo especifico da tecnologia"
+          description="Campos opcionais para massa efetiva, curso util e CAPEX especifico."
+        >
+          {technologyType === "tower" ? (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <label className="grid gap-2 text-sm font-semibold text-slate-700">
+                Quantidade de blocos
+                <input
+                  className={controlClass}
+                  type="number"
+                  min={1}
+                  {...register(`${fieldPrefix}.block_count`, optionalNumber)}
+                />
+                <FieldError message={errors?.block_count?.message} />
+              </label>
+
+              <label className="grid gap-2 text-sm font-semibold text-slate-700">
+                Massa por bloco kg
+                <input
+                  className={controlClass}
+                  type="number"
+                  min={0}
+                  step="any"
+                  {...register(`${fieldPrefix}.mass_per_block_kg`, optionalNumber)}
+                />
+                <FieldError message={errors?.mass_per_block_kg?.message} />
+              </label>
+
+              <label className="grid gap-2 text-sm font-semibold text-slate-700">
+                Fracao de altura util
+                <input
+                  className={controlClass}
+                  type="number"
+                  min={0}
+                  max={1}
+                  step="0.01"
+                  {...register(`${fieldPrefix}.usable_height_fraction`, {
+                    valueAsNumber: true,
+                  })}
+                />
+                <FieldError message={errors?.usable_height_fraction?.message} />
+              </label>
+
+              <label className="grid gap-2 text-sm font-semibold text-slate-700">
+                Custo estrutural por metro
+                <input
+                  className={controlClass}
+                  type="number"
+                  min={0}
+                  step="any"
+                  {...register(`${fieldPrefix}.structure_cost_per_meter`, {
+                    valueAsNumber: true,
+                  })}
+                />
+                <FieldError message={errors?.structure_cost_per_meter?.message} />
+              </label>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <label className="grid gap-2 text-sm font-semibold text-slate-700">
+                Fracao de profundidade util
+                <input
+                  className={controlClass}
+                  type="number"
+                  min={0}
+                  max={1}
+                  step="0.01"
+                  {...register(`${fieldPrefix}.usable_depth_fraction`, {
+                    valueAsNumber: true,
+                  })}
+                />
+                <FieldError message={errors?.usable_depth_fraction?.message} />
+              </label>
+
+              <label className="grid gap-2 text-sm font-semibold text-slate-700">
+                Custo de reabilitacao do poco
+                <input
+                  className={controlClass}
+                  type="number"
+                  min={0}
+                  step="any"
+                  {...register(`${fieldPrefix}.shaft_rehabilitation_cost`, {
+                    valueAsNumber: true,
+                  })}
+                />
+                <FieldError message={errors?.shaft_rehabilitation_cost?.message} />
+              </label>
+
+              <label className="grid gap-2 text-sm font-semibold text-slate-700">
+                Densidade do material kg/m3
+                <input
+                  className={controlClass}
+                  type="number"
+                  min={0}
+                  step="any"
+                  {...register(`${fieldPrefix}.material_density_kg_m3`, optionalNumber)}
+                />
+                <FieldError message={errors?.material_density_kg_m3?.message} />
+              </label>
+
+              <label className="grid gap-2 text-sm font-semibold text-slate-700">
+                Volume do container m3
+                <input
+                  className={controlClass}
+                  type="number"
+                  min={0}
+                  step="any"
+                  {...register(`${fieldPrefix}.container_volume_m3`, optionalNumber)}
+                />
+                <FieldError message={errors?.container_volume_m3?.message} />
+              </label>
+            </div>
+          )}
+        </FormGroup>
+
+        <section className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div>
+              <span className="block text-xs font-medium text-blue-700">
+                Massa efetiva prevista
+              </span>
+              <strong className="mt-1 block text-lg font-semibold text-blue-950">
+                {formatTechnologyNumber(technologyPreview.effectiveMassKg)} kg
+              </strong>
+              <span className="mt-1 block text-xs font-medium text-blue-700">
+                {technologyPreview.massSourceDetail}
+              </span>
+            </div>
+
+            <div>
+              <span className="block text-xs font-medium text-blue-700">
+                {technologyType === "tower"
+                  ? "Altura util prevista"
+                  : "Profundidade util prevista"}
+              </span>
+              <strong className="mt-1 block text-lg font-semibold text-blue-950">
+                {formatTechnologyNumber(technologyPreview.usableDistanceM)} m
+              </strong>
+            </div>
+
+            <div>
+              <span className="block text-xs font-medium text-blue-700">
+                Capacidade fisica prevista
+              </span>
+              <strong className="mt-1 block text-lg font-semibold text-blue-950">
+                {formatTechnologyNumber(technologyPreview.storageCapacityKwh)} kWh
+              </strong>
+            </div>
+
+            <div>
+              <span className="block text-xs font-medium text-blue-700">
+                Multiplicador da massa
+              </span>
+              <strong className="mt-1 block text-lg font-semibold text-blue-950">
+                {formatTechnologyNumber(technologyPreview.massMultiplier, 3)}x
+              </strong>
+              <span className="mt-1 block text-xs font-medium text-blue-700">
+                {technologyPreview.usesTechnologySpecificMass
+                  ? "comparado a massa base"
+                  : "usando massa base"}
+              </span>
+            </div>
+          </div>
+        </section>
 
         <FormGroup
           title="Eficiências"
-          description="Eficiências de conversão e perdas internas."
+          description="Eficiências de carga e descarga."
         >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2">
             <label className="grid gap-2 text-sm font-semibold text-slate-700">
-              Motor
+              Carga
               <input
                 className={controlClass}
                 type="number"
                 step="any"
-                {...register(`${fieldPrefix}.motor_efficiency`, {
+                {...register(`${fieldPrefix}.charge_efficiency`, {
                   valueAsNumber: true,
                 })}
               />
-              <FieldError message={errors?.motor_efficiency?.message} />
+              <FieldError message={errors?.charge_efficiency?.message} />
             </label>
 
             <label className="grid gap-2 text-sm font-semibold text-slate-700">
-              Gerador
+              Descarga
               <input
                 className={controlClass}
                 type="number"
                 step="any"
-                {...register(`${fieldPrefix}.generator_efficiency`, {
+                {...register(`${fieldPrefix}.discharge_efficiency`, {
                   valueAsNumber: true,
                 })}
               />
-              <FieldError message={errors?.generator_efficiency?.message} />
-            </label>
-
-            <label className="grid gap-2 text-sm font-semibold text-slate-700">
-              Mecânica
-              <input
-                className={controlClass}
-                type="number"
-                step="any"
-                {...register(`${fieldPrefix}.mechanical_efficiency`, {
-                  valueAsNumber: true,
-                })}
-              />
-              <FieldError message={errors?.mechanical_efficiency?.message} />
-            </label>
-
-            <label className="grid gap-2 text-sm font-semibold text-slate-700">
-              Auxiliar
-              <input
-                className={controlClass}
-                type="number"
-                step="any"
-                {...register(`${fieldPrefix}.auxiliary_efficiency`, {
-                  valueAsNumber: true,
-                })}
-              />
-              <FieldError message={errors?.auxiliary_efficiency?.message} />
+              <FieldError message={errors?.discharge_efficiency?.message} />
             </label>
           </div>
         </FormGroup>
@@ -360,6 +545,63 @@ export function ComparisonScenarioForm({
                 })}
               />
               <FieldError message={errors?.cycles_per_year?.message} />
+            </label>
+
+            <label className="grid gap-2 text-sm font-semibold text-slate-700">
+              Disponibilidade operacional
+              <input
+                className={controlClass}
+                type="number"
+                step="any"
+                min="0"
+                max="1"
+                {...register(`${fieldPrefix}.availability_factor`, {
+                  valueAsNumber: true,
+                })}
+              />
+              <FieldError message={errors?.availability_factor?.message} />
+            </label>
+
+            <label className="grid gap-2 text-sm font-semibold text-slate-700">
+              Custo de reposicao
+              <input
+                className={controlClass}
+                type="number"
+                step="any"
+                min="0"
+                {...register(`${fieldPrefix}.replacement_cost`, {
+                  setValueAs: (value) => (value === "" ? undefined : Number(value)),
+                })}
+              />
+              <FieldError message={errors?.replacement_cost?.message} />
+            </label>
+
+            <label className="grid gap-2 text-sm font-semibold text-slate-700">
+              Ano da reposicao
+              <input
+                className={controlClass}
+                type="number"
+                step="1"
+                min="1"
+                {...register(`${fieldPrefix}.replacement_year`, {
+                  setValueAs: (value) => (value === "" ? null : Number(value)),
+                })}
+              />
+              <FieldError message={errors?.replacement_year?.message} />
+            </label>
+
+            <label className="grid gap-2 text-sm font-semibold text-slate-700">
+              Custo de fim de vida
+              <input
+                className={controlClass}
+                type="number"
+                step="any"
+                min="0"
+                {...register(`${fieldPrefix}.end_of_life_cost`, {
+                  setValueAs: (value) => (value === "" ? undefined : Number(value)),
+                })}
+              />
+              <FieldError message={errors?.end_of_life_cost?.message} />
             </label>
           </div>
         </FormGroup>

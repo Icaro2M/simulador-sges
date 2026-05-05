@@ -11,11 +11,21 @@ export function SimulationPage() {
 
   const {
     result,
+    lastPreview,
     isLoading,
     errorMessage,
     runSimulation,
     clearResult,
   } = useSimulation();
+  const returnedMass = result?.result.technology_result.effective_mass_kg;
+  const returnedCapacity = result?.result.technology_result.stored_energy_kwh;
+  const hasSimulationPreviewMismatch =
+    result !== null &&
+    lastPreview !== null &&
+    (typeof returnedMass !== "number" ||
+      typeof returnedCapacity !== "number" ||
+      Math.abs(returnedMass - lastPreview.effectiveMassKg) > 1e-6 ||
+      Math.abs(returnedCapacity - lastPreview.storageCapacityKwh) > 1e-6);
 
   useEffect(() => {
     if (result) {
@@ -38,8 +48,9 @@ export function SimulationPage() {
       type: "simulation",
       title: response.scenario_name ?? response.result.scenario_name ?? "Simulação SGES",
       createdAt: new Date().toISOString(),
-      lcos_per_mwh: response.result.lcos_result.lcos_per_mwh,
+      lcos_per_mwh: response.result.lcos_result?.lcos_per_mwh,
       delivered_energy_kwh: response.result.technology_result.delivered_energy_kwh,
+      effective_delivered_energy_kwh: response.result.effective_delivered_energy_kwh,
       rte: response.result.technology_result.round_trip_efficiency,
       capex: response.result.initial_capex,
     });
@@ -56,6 +67,14 @@ export function SimulationPage() {
         {errorMessage && (
           <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
             {errorMessage}
+          </div>
+        )}
+
+        {hasSimulationPreviewMismatch && (
+          <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+            A API retornou massa/capacidade diferente da previsualizacao do
+            formulario. O backend em localhost:8000 provavelmente esta rodando
+            uma versao antiga; reinicie a API e execute a simulacao novamente.
           </div>
         )}
 

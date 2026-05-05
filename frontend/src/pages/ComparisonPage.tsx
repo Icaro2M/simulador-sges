@@ -69,9 +69,15 @@ export function ComparisonPage() {
       return;
     }
 
-    const bestLcosResult = comparisonResults.reduce((best, current) =>
-      current.lcos_per_mwh < best.lcos_per_mwh ? current : best
+    const resultsWithLcos = comparisonResults.filter(
+      (item) => typeof item.lcos_per_mwh === "number"
     );
+    const bestLcosResult =
+      resultsWithLcos.length > 0
+        ? resultsWithLcos.reduce((best, current) =>
+            current.lcos_per_mwh! < best.lcos_per_mwh! ? current : best
+          )
+        : null;
 
     const bestEnergyResult = comparisonResults.reduce((best, current) =>
       current.delivered_energy_kwh > best.delivered_energy_kwh ? current : best
@@ -88,10 +94,10 @@ export function ComparisonPage() {
       type: "comparison",
       title: `Comparação: ${comparisonResults.length} cenários`,
       createdAt: new Date().toISOString(),
-      lcos_per_mwh: bestLcosResult.lcos_per_mwh,
+      lcos_per_mwh: bestLcosResult?.lcos_per_mwh ?? undefined,
       delivered_energy_kwh: bestEnergyResult.delivered_energy_kwh,
       rte: bestEfficiencyResult.round_trip_efficiency,
-      capex: bestLcosResult.initial_capex,
+      capex: bestLcosResult?.initial_capex,
     });
   }
 
@@ -119,12 +125,13 @@ export function ComparisonPage() {
 
           <div className="grid gap-8">
             {fields.map((field, index) => (
-              <ComparisonScenarioForm
-                key={field.id}
-                index={index}
-                register={register}
-                errors={errors.scenarios?.[index]}
-                canRemove={fields.length > 2}
+            <ComparisonScenarioForm
+              key={field.id}
+              index={index}
+              register={register}
+              control={control}
+              errors={errors.scenarios?.[index]}
+              canRemove={fields.length > 2}
                 onRemove={() => remove(index)}
               />
             ))}

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { DispatchChart } from "../components/charts/DispatchChart";
 import { DispatchPriceProfileForm } from "../components/forms/DispatchPriceProfileForm";
@@ -13,6 +13,11 @@ import {
   exportDispatchToCsv,
   exportDispatchToJson,
 } from "../utils/exportDispatch";
+import {
+  calculateTechnologyPreview,
+  formatTechnologyNumber,
+  buildTechnologyScenarioPayload,
+} from "../utils/technologyModel";
 
 const defaultScenario: SimulationRequest = {
   name: "Dispatch Scenario",
@@ -22,11 +27,15 @@ const defaultScenario: SimulationRequest = {
   mass_kg: 100000,
   height_m: 100,
   nominal_power_kw: 500,
+  charge_power_kw: 500,
+  discharge_power_kw: 500,
+  usable_height_fraction: 1,
+  structure_cost_per_meter: 0,
+  usable_depth_fraction: 1,
+  shaft_rehabilitation_cost: 0,
 
-  motor_efficiency: 0.9,
-  generator_efficiency: 0.9,
-  mechanical_efficiency: 0.95,
-  auxiliary_efficiency: 0.98,
+  charge_efficiency: 0.9,
+  discharge_efficiency: 0.9,
 
   cycle_loss_fraction: 0.02,
   fixed_cycle_loss_kwh: 5,
@@ -37,10 +46,12 @@ const defaultScenario: SimulationRequest = {
   fixed_capex: 100000,
   fixed_annual_opex: 10000,
   variable_opex_per_mwh: 5,
+  charging_energy_cost_per_mwh: 0,
 
   project_lifetime_years: 25,
   discount_rate: 0.08,
   cycles_per_year: 300,
+  availability_factor: 1,
 };
 
 const defaultPriceProfile: DispatchPricePoint[] = [
@@ -63,6 +74,21 @@ const inputClass =
 
 const secondaryButtonClass =
   "inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:opacity-60";
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function getSummaryNumber(summary: unknown, key: string) {
+  if (!summary || typeof summary !== "object" || !(key in summary)) {
+    return undefined;
+  }
+
+  const value = (summary as Record<string, unknown>)[key];
+
+  return isFiniteNumber(value) ? value : undefined;
+}
+
 
 function FormSection({
   title,
@@ -120,6 +146,25 @@ export function DispatchPage() {
   const [initialSocKwh, setInitialSocKwh] = useState(0);
 
   const [validationError, setValidationError] = useState<string | null>(null);
+  const technologyPreview = useMemo(
+    () => calculateTechnologyPreview(scenario),
+    [scenario]
+  );
+  const returnedEffectiveMassKg = getSummaryNumber(
+    data?.summary,
+    "effective_mass_kg"
+  );
+  const returnedStorageCapacityKwh = getSummaryNumber(
+    data?.summary,
+    "storage_capacity_kwh"
+  );
+  const hasPreviewMismatch =
+    returnedEffectiveMassKg !== undefined &&
+    returnedStorageCapacityKwh !== undefined &&
+    (Math.abs(returnedEffectiveMassKg - technologyPreview.effectiveMassKg) > 1e-6 ||
+      Math.abs(
+        returnedStorageCapacityKwh - technologyPreview.storageCapacityKwh
+      ) > 1e-6);
 
   useEffect(() => {
     if (data) {
@@ -140,6 +185,10 @@ export function DispatchPage() {
     }));
   }
 
+  function parseOptionalNumber(value: string) {
+    return value === "" ? undefined : Number(value);
+  }
+
   function validateDispatchInput() {
     if (!scenario.name.trim()) {
       setValidationError("O nome do cenário é obrigatório.");
@@ -156,8 +205,144 @@ export function DispatchPage() {
       return false;
     }
 
-    if (scenario.nominal_power_kw <= 0) {
-      setValidationError("A potência nominal precisa ser maior que zero.");
+    if (
+      scenario.usable_height_fraction !== undefined &&
+      (scenario.usable_height_fraction <= 0 || scenario.usable_height_fraction > 1)
+    ) {
+      setValidationError("A fracao de altura util precisa estar entre 0 e 1.");
+      return false;
+    }
+
+    if (
+      scenario.usable_depth_fraction !== undefined &&
+      (scenario.usable_depth_fraction <= 0 || scenario.usable_depth_fraction > 1)
+    ) {
+      setValidationError("A fracao de profundidade util precisa estar entre 0 e 1.");
+      return false;
+    }
+
+    const hasBlockCount =
+      scenario.block_count !== undefined && scenario.block_count !== null;
+    const blockCount = scenario.block_count;
+    const hasMassPerBlock =
+      scenario.mass_per_block_kg !== undefined &&
+      scenario.mass_per_block_kg !== null;
+    const massPerBlockKg = scenario.mass_per_block_kg;
+    const hasMaterialDensity =
+      scenario.material_density_kg_m3 !== undefined &&
+      scenario.material_density_kg_m3 !== null;
+    const materialDensityKgM3 = scenario.material_density_kg_m3;
+    const hasContainerVolume =
+      scenario.container_volume_m3 !== undefined &&
+      scenario.container_volume_m3 !== null;
+    const containerVolumeM3 = scenario.container_volume_m3;
+
+    if (hasBlockCount !== hasMassPerBlock) {
+      setValidationError("Informe quantidade de blocos e massa por bloco juntos.");
+      return false;
+    }
+
+    if (
+      hasBlockCount &&
+      (blockCount === undefined ||
+        blockCount === null ||
+        blockCount <= 0 ||
+        !Number.isInteger(blockCount))
+    ) {
+      setValidationError("A quantidade de blocos precisa ser inteira e positiva.");
+      return false;
+    }
+
+    if (
+      hasMassPerBlock &&
+      (massPerBlockKg === undefined ||
+        massPerBlockKg === null ||
+        massPerBlockKg <= 0)
+    ) {
+      setValidationError("A massa por bloco precisa ser maior que zero.");
+      return false;
+    }
+
+    if ((scenario.structure_cost_per_meter ?? 0) < 0) {
+      setValidationError("O custo estrutural por metro nao pode ser negativo.");
+      return false;
+    }
+
+    if ((scenario.shaft_rehabilitation_cost ?? 0) < 0) {
+      setValidationError("O custo de reabilitacao do poco nao pode ser negativo.");
+      return false;
+    }
+
+    if (hasMaterialDensity !== hasContainerVolume) {
+      setValidationError("Informe densidade do material e volume juntos.");
+      return false;
+    }
+
+    if (
+      hasMaterialDensity &&
+      (materialDensityKgM3 === undefined ||
+        materialDensityKgM3 === null ||
+        materialDensityKgM3 <= 0)
+    ) {
+      setValidationError("A densidade do material precisa ser maior que zero.");
+      return false;
+    }
+
+    if (
+      hasContainerVolume &&
+      (containerVolumeM3 === undefined ||
+        containerVolumeM3 === null ||
+        containerVolumeM3 <= 0)
+    ) {
+      setValidationError("O volume do container precisa ser maior que zero.");
+      return false;
+    }
+
+    if (scenario.charge_power_kw <= 0) {
+      setValidationError("A potência de carga precisa ser maior que zero.");
+      return false;
+    }
+
+    if (scenario.discharge_power_kw <= 0) {
+      setValidationError("A potência de descarga precisa ser maior que zero.");
+      return false;
+    }
+
+    if (scenario.charge_efficiency <= 0 || scenario.charge_efficiency > 1) {
+      setValidationError("A eficiência de carga precisa estar entre 0 e 1.");
+      return false;
+    }
+
+    if (scenario.discharge_efficiency <= 0 || scenario.discharge_efficiency > 1) {
+      setValidationError("A eficiência de descarga precisa estar entre 0 e 1.");
+      return false;
+    }
+
+    if (scenario.charging_energy_cost_per_mwh < 0) {
+      setValidationError("O custo da energia de carga nao pode ser negativo.");
+      return false;
+    }
+
+    if (scenario.availability_factor < 0 || scenario.availability_factor > 1) {
+      setValidationError("A disponibilidade operacional precisa estar entre 0 e 1.");
+      return false;
+    }
+
+    const replacementCost = scenario.replacement_cost ?? 0;
+    const endOfLifeCost = scenario.end_of_life_cost ?? 0;
+
+    if (replacementCost < 0 || endOfLifeCost < 0) {
+      setValidationError("Custos de reposicao e fim de vida nao podem ser negativos.");
+      return false;
+    }
+
+    if (
+      scenario.replacement_year !== undefined &&
+      scenario.replacement_year !== null &&
+      (scenario.replacement_year < 1 ||
+        scenario.replacement_year > scenario.project_lifetime_years)
+    ) {
+      setValidationError("O ano de reposicao precisa estar dentro da vida util.");
       return false;
     }
 
@@ -201,7 +386,7 @@ export function DispatchPage() {
     );
 
     const request: DispatchRequest = {
-      scenario,
+      scenario: buildTechnologyScenarioPayload(scenario),
       price_profile: sortedPriceProfile,
       low_price_threshold: lowPriceThreshold,
       high_price_threshold: highPriceThreshold,
@@ -272,7 +457,7 @@ export function DispatchPage() {
               </select>
             </Field>
 
-            <Field label="Massa kg">
+            <Field label="Massa base/fallback kg">
               <input
                 className={inputClass}
                 type="number"
@@ -283,7 +468,7 @@ export function DispatchPage() {
               />
             </Field>
 
-            <Field label="Altura m">
+            <Field label="Altura/profundidade base m">
               <input
                 className={inputClass}
                 type="number"
@@ -307,65 +492,247 @@ export function DispatchPage() {
                 }
               />
             </Field>
+
+            <Field label="Potência de carga kW">
+              <input
+                className={inputClass}
+                type="number"
+                value={scenario.charge_power_kw}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "charge_power_kw",
+                    Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
+            <Field label="Potência de descarga kW">
+              <input
+                className={inputClass}
+                type="number"
+                value={scenario.discharge_power_kw}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "discharge_power_kw",
+                    Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
           </div>
         </FormSection>
+        <FormSection
+          title="Modelo especifico da tecnologia"
+          description="Campos opcionais para diferenciar massa, curso util e CAPEX especifico."
+        >
+          {scenario.technology_type === "tower" ? (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <Field label="Quantidade de blocos">
+                <input
+                  className={inputClass}
+                  type="number"
+                  min={1}
+                  value={scenario.block_count ?? ""}
+                  onChange={(event) =>
+                    updateScenarioField(
+                      "block_count",
+                      parseOptionalNumber(event.target.value)
+                    )
+                  }
+                />
+              </Field>
+
+              <Field label="Massa por bloco kg">
+                <input
+                  className={inputClass}
+                  type="number"
+                  min={0}
+                  value={scenario.mass_per_block_kg ?? ""}
+                  onChange={(event) =>
+                    updateScenarioField(
+                      "mass_per_block_kg",
+                      parseOptionalNumber(event.target.value)
+                    )
+                  }
+                />
+              </Field>
+
+              <Field label="Fracao de altura util">
+                <input
+                  className={inputClass}
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  max={1}
+                  value={scenario.usable_height_fraction ?? 1}
+                  onChange={(event) =>
+                    updateScenarioField(
+                      "usable_height_fraction",
+                      Number(event.target.value)
+                    )
+                  }
+                />
+              </Field>
+
+              <Field label="Custo estrutural por metro">
+                <input
+                  className={inputClass}
+                  type="number"
+                  min={0}
+                  value={scenario.structure_cost_per_meter ?? 0}
+                  onChange={(event) =>
+                    updateScenarioField(
+                      "structure_cost_per_meter",
+                      Number(event.target.value)
+                    )
+                  }
+                />
+              </Field>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <Field label="Fracao de profundidade util">
+                <input
+                  className={inputClass}
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  max={1}
+                  value={scenario.usable_depth_fraction ?? 1}
+                  onChange={(event) =>
+                    updateScenarioField(
+                      "usable_depth_fraction",
+                      Number(event.target.value)
+                    )
+                  }
+                />
+              </Field>
+
+              <Field label="Custo de reabilitacao do poco">
+                <input
+                  className={inputClass}
+                  type="number"
+                  min={0}
+                  value={scenario.shaft_rehabilitation_cost ?? 0}
+                  onChange={(event) =>
+                    updateScenarioField(
+                      "shaft_rehabilitation_cost",
+                      Number(event.target.value)
+                    )
+                  }
+                />
+              </Field>
+
+              <Field label="Densidade do material kg/m3">
+                <input
+                  className={inputClass}
+                  type="number"
+                  min={0}
+                  value={scenario.material_density_kg_m3 ?? ""}
+                  onChange={(event) =>
+                    updateScenarioField(
+                      "material_density_kg_m3",
+                      parseOptionalNumber(event.target.value)
+                    )
+                  }
+                />
+              </Field>
+
+              <Field label="Volume do container m3">
+                <input
+                  className={inputClass}
+                  type="number"
+                  min={0}
+                  value={scenario.container_volume_m3 ?? ""}
+                  onChange={(event) =>
+                    updateScenarioField(
+                      "container_volume_m3",
+                      parseOptionalNumber(event.target.value)
+                    )
+                  }
+                />
+              </Field>
+            </div>
+          )}
+        </FormSection>
+
+        <section className="rounded-lg border border-blue-200 bg-blue-50 p-5 shadow-sm">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div>
+              <span className="block text-sm font-medium text-blue-700">
+                Massa efetiva prevista
+              </span>
+              <strong className="mt-1 block text-xl font-semibold text-blue-950">
+                {formatTechnologyNumber(technologyPreview.effectiveMassKg)} kg
+              </strong>
+              <span className="mt-1 block text-xs font-medium text-blue-700">
+                {technologyPreview.massSourceDetail}
+              </span>
+            </div>
+
+            <div>
+              <span className="block text-sm font-medium text-blue-700">
+                {scenario.technology_type === "tower"
+                  ? "Altura util prevista"
+                  : "Profundidade util prevista"}
+              </span>
+              <strong className="mt-1 block text-xl font-semibold text-blue-950">
+                {formatTechnologyNumber(technologyPreview.usableDistanceM)} m
+              </strong>
+            </div>
+
+            <div>
+              <span className="block text-sm font-medium text-blue-700">
+                Capacidade fisica prevista
+              </span>
+              <strong className="mt-1 block text-xl font-semibold text-blue-950">
+                {formatTechnologyNumber(technologyPreview.storageCapacityKwh)} kWh
+              </strong>
+            </div>
+
+            <div>
+              <span className="block text-sm font-medium text-blue-700">
+                Multiplicador da massa
+              </span>
+              <strong className="mt-1 block text-xl font-semibold text-blue-950">
+                {formatTechnologyNumber(technologyPreview.massMultiplier, 3)}x
+              </strong>
+              <span className="mt-1 block text-xs font-medium text-blue-700">
+                {technologyPreview.usesTechnologySpecificMass
+                  ? "comparado a massa base"
+                  : "usando massa base"}
+              </span>
+            </div>
+          </div>
+        </section>
 
         <FormSection title="Eficiências e perdas">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <Field label="Eficiência do motor">
+            <Field label="Eficiência de carga">
               <input
                 className={inputClass}
                 type="number"
                 step="0.01"
-                value={scenario.motor_efficiency}
+                value={scenario.charge_efficiency}
                 onChange={(event) =>
                   updateScenarioField(
-                    "motor_efficiency",
+                    "charge_efficiency",
                     Number(event.target.value)
                   )
                 }
               />
             </Field>
 
-            <Field label="Eficiência do gerador">
+            <Field label="Eficiência de descarga">
               <input
                 className={inputClass}
                 type="number"
                 step="0.01"
-                value={scenario.generator_efficiency}
+                value={scenario.discharge_efficiency}
                 onChange={(event) =>
                   updateScenarioField(
-                    "generator_efficiency",
-                    Number(event.target.value)
-                  )
-                }
-              />
-            </Field>
-
-            <Field label="Eficiência mecânica">
-              <input
-                className={inputClass}
-                type="number"
-                step="0.01"
-                value={scenario.mechanical_efficiency}
-                onChange={(event) =>
-                  updateScenarioField(
-                    "mechanical_efficiency",
-                    Number(event.target.value)
-                  )
-                }
-              />
-            </Field>
-
-            <Field label="Eficiência auxiliar">
-              <input
-                className={inputClass}
-                type="number"
-                step="0.01"
-                value={scenario.auxiliary_efficiency}
-                onChange={(event) =>
-                  updateScenarioField(
-                    "auxiliary_efficiency",
+                    "discharge_efficiency",
                     Number(event.target.value)
                   )
                 }
@@ -480,6 +847,20 @@ export function DispatchPage() {
               />
             </Field>
 
+            <Field label="Custo da energia de carga por MWh">
+              <input
+                className={inputClass}
+                type="number"
+                value={scenario.charging_energy_cost_per_mwh}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "charging_energy_cost_per_mwh",
+                    Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
             <Field label="Vida útil anos">
               <input
                 className={inputClass}
@@ -515,6 +896,68 @@ export function DispatchPage() {
                   updateScenarioField(
                     "cycles_per_year",
                     Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
+            <Field label="Disponibilidade operacional">
+              <input
+                className={inputClass}
+                type="number"
+                step="0.01"
+                min={0}
+                max={1}
+                value={scenario.availability_factor}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "availability_factor",
+                    Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
+            <Field label="Custo de reposicao">
+              <input
+                className={inputClass}
+                type="number"
+                min={0}
+                value={scenario.replacement_cost ?? ""}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "replacement_cost",
+                    event.target.value === "" ? undefined : Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
+            <Field label="Ano da reposicao">
+              <input
+                className={inputClass}
+                type="number"
+                min={1}
+                value={scenario.replacement_year ?? ""}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "replacement_year",
+                    event.target.value === "" ? null : Number(event.target.value)
+                  )
+                }
+              />
+            </Field>
+
+            <Field label="Custo de fim de vida">
+              <input
+                className={inputClass}
+                type="number"
+                min={0}
+                value={scenario.end_of_life_cost ?? ""}
+                onChange={(event) =>
+                  updateScenarioField(
+                    "end_of_life_cost",
+                    event.target.value === "" ? undefined : Number(event.target.value)
                   )
                 }
               />
@@ -579,9 +1022,17 @@ export function DispatchPage() {
           </p>
         )}
 
+        {hasPreviewMismatch && (
+          <p className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+            A API retornou massa/capacidade diferente da previsualizacao do
+            formulario. Reinicie o backend em localhost:8000 ou verifique se a
+            chamada esta apontando para a versao atualizada.
+          </p>
+        )}
+
         {data && data.results.length > 0 && (
           <div className="space-y-6 scroll-mt-6" ref={resultsRef}>
-            <DispatchSummary data={data.results} />
+            <DispatchSummary data={data.results} summary={data.summary} />
 
             <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

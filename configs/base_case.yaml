@@ -5,15 +5,15 @@ technology:
   mass_kg: 1000000
   height_m: 150
   nominal_power_kw: 1000
-  motor_efficiency: 0.92
-  generator_efficiency: 0.92
-  mechanical_efficiency: 0.90
-  auxiliary_efficiency: 0.99
+  charge_power_kw: 1000
+  discharge_power_kw: 1000
+  charge_efficiency: 0.828
+  discharge_efficiency: 0.9108
 
 losses:
-  cycle_loss_fraction: 0.02
+  additional_cycle_loss_fraction: 0.02
   fixed_cycle_loss_kwh: 0.75
-  standby_loss_kwh_per_hour: 0.02
+  standby_loss_stored_kwh_per_hour: 0.02
 
 economics:
   cost_per_kw: 1000
@@ -21,6 +21,11 @@ economics:
   fixed_capex: 120000
   fixed_annual_opex: 25000
   variable_opex_per_mwh: 2.5
+  charging_energy_cost_per_mwh: 0
   project_lifetime_years: 30
   discount_rate: 0.08
   cycles_per_year: 300
+  availability_factor: 1.0
+  replacement_cost: 0
+  replacement_year:
+  end_of_life_cost: 0

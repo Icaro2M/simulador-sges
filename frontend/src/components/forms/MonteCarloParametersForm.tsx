@@ -20,6 +20,8 @@ export function MonteCarloParametersForm({
     (option) => !selectedParameters.includes(option.path)
   );
 
+  const hasAvailableParameters = availableParameters.length > 0;
+
   function getParameterLabel(parameter: string) {
     return (
       monteCarloParameterOptions.find((option) => option.path === parameter)
@@ -70,8 +72,13 @@ export function MonteCarloParametersForm({
       <label className="grid max-w-xl gap-2 text-sm font-semibold text-slate-700">
         Adicionar parâmetro
         <select
-          className={controlClass}
+          className={`${controlClass} ${
+            !hasAvailableParameters
+              ? "cursor-not-allowed bg-slate-100 text-slate-400 opacity-60"
+              : ""
+          }`}
           value=""
+          disabled={!hasAvailableParameters}
           onChange={(event) => {
             if (event.target.value) {
               addParameter(event.target.value);

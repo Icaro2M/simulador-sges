@@ -44,7 +44,11 @@ def run_monte_carlo(
             {
                 "iteration": index + 1,
                 "sampled_values": sampled_values,
-                "lcos": result.lcos_result.lcos_per_mwh,
+                "lcos": (
+                    result.lcos_result.lcos_per_mwh
+                    if result.lcos_result is not None
+                    else None
+                ),
                 "capex": result.initial_capex,
                 "annual_energy_mwh": result.annual_discharged_energy_mwh,
                 "round_trip_efficiency": result.technology_result.round_trip_efficiency,

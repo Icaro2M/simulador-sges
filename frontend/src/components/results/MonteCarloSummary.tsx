@@ -11,6 +11,10 @@ interface Props {
   metric: MonteCarloMetric;
 }
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
 const metricLabels: Record<MonteCarloMetric, string> = {
   lcos: "LCOS",
   capex: "CAPEX",
@@ -60,7 +64,7 @@ function SummaryCard({ title, value }: { title: string; value: string }) {
 export function MonteCarloSummary({ results, metric }: Props) {
   const values = results
     .map((item) => item[metric])
-    .filter((value) => Number.isFinite(value));
+    .filter(isFiniteNumber);
 
   if (values.length === 0) {
     return null;

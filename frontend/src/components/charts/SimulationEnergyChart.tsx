@@ -8,22 +8,36 @@ import {
   YAxis,
 } from "recharts";
 
-import type { TechnologySimulationResult } from "../../types/simulation";
+import type { SimulationResultData } from "../../types/simulation";
 import { formatNumber } from "../../utils/formatters";
 
 interface Props {
-  data: TechnologySimulationResult;
+  data: SimulationResultData;
 }
 
 export function SimulationEnergyChart({ data }: Props) {
+  const technology = data.technology_result;
+
   const chartData = [
     {
-      name: "Armazenada",
-      energy: data.stored_energy_kwh,
+      name: "Entrada",
+      energy: technology.input_energy_kwh ?? technology.required_charge_energy_kwh,
     },
     {
-      name: "Entregue",
-      energy: data.delivered_energy_kwh,
+      name: "Potencial",
+      energy: technology.max_potential_energy_kwh ?? technology.stored_energy_kwh,
+    },
+    {
+      name: "Disponivel",
+      energy: data.available_energy_kwh ?? technology.stored_energy_kwh,
+    },
+    {
+      name: "Antes perdas",
+      energy: data.gross_delivered_energy_kwh ?? technology.delivered_energy_kwh,
+    },
+    {
+      name: "Efetiva",
+      energy: data.effective_delivered_energy_kwh,
     },
   ];
 
@@ -31,10 +45,10 @@ export function SimulationEnergyChart({ data }: Props) {
     <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
       <div className="mb-5">
         <h3 className="text-base font-semibold text-slate-950">
-          Energia armazenada vs. entregue
+          Fluxo energético operacional
         </h3>
         <p className="mt-1 text-sm text-slate-500">
-          Comparação entre energia potencial armazenada e energia útil entregue.
+          Compara entrada elétrica, potencial armazenado, perdas e entrega efetiva.
         </p>
       </div>
 

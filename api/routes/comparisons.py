@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 
 from api.schemas.analysis import ComparisonRequest, ComparisonResponse
 from api.services.simulation_service import SimulationService
+from sges.core.exceptions import InvalidParameterError
 
 
 router = APIRouter(
@@ -20,6 +21,12 @@ def compare(request: ComparisonRequest):
         return ComparisonResponse(
             success=True,
             results=results,
+        )
+
+    except InvalidParameterError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
         )
 
     except Exception as error:

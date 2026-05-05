@@ -55,9 +55,15 @@ export function SensitivityPage() {
       return;
     }
 
-    const bestLcosResult = response.results.reduce((best, current) =>
-      current.lcos < best.lcos ? current : best
+    const resultsWithLcos = response.results.filter(
+      (item) => typeof item.lcos === "number"
     );
+    const bestLcosResult =
+      resultsWithLcos.length > 0
+        ? resultsWithLcos.reduce((best, current) =>
+            current.lcos! < best.lcos! ? current : best
+          )
+        : null;
 
     const bestCapexResult = response.results.reduce((best, current) =>
       current.capex < best.capex ? current : best
@@ -72,13 +78,17 @@ export function SensitivityPage() {
       type: "sensitivity",
       title: `Sensibilidade: ${response.parameter}`,
       createdAt: new Date().toISOString(),
-      lcos_per_mwh: bestLcosResult.lcos,
+      lcos_per_mwh: bestLcosResult?.lcos ?? undefined,
       delivered_energy_kwh: bestEnergyResult.annual_energy_mwh * 1000,
       capex: bestCapexResult.capex,
     });
   }
 
-  function formatMetricValue(value: number) {
+  function formatMetricValue(value: number | null) {
+    if (value === null) {
+      return "Indefinido";
+    }
+
     if (metric === "lcos" || metric === "capex") {
       return formatCurrency(value);
     }
