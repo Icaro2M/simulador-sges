@@ -32,9 +32,13 @@ class DispatchService:
                 high_price_threshold=request.high_price_threshold,
                 initial_soc_kwh=request.initial_soc_kwh,
                 loss_model=LossModel(
-                    cycle_loss_fraction=scenario.losses.cycle_loss_fraction,
+                    additional_cycle_loss_fraction=(
+                        scenario.losses.additional_cycle_loss_fraction
+                    ),
                     fixed_cycle_loss_kwh=scenario.losses.fixed_cycle_loss_kwh,
-                    standby_loss_kwh_per_hour=scenario.losses.standby_loss_kwh_per_hour,
+                    standby_loss_stored_kwh_per_hour=(
+                        scenario.losses.standby_loss_stored_kwh_per_hour
+                    ),
                 ),
             ),
         )

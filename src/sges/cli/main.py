@@ -200,9 +200,11 @@ def dispatch(
     price_profile = load_time_series_csv(prices)
 
     loss_model = LossModel(
-        cycle_loss_fraction=scenario.losses.cycle_loss_fraction,
+        additional_cycle_loss_fraction=scenario.losses.additional_cycle_loss_fraction,
         fixed_cycle_loss_kwh=scenario.losses.fixed_cycle_loss_kwh,
-        standby_loss_kwh_per_hour=scenario.losses.standby_loss_kwh_per_hour,
+        standby_loss_stored_kwh_per_hour=(
+            scenario.losses.standby_loss_stored_kwh_per_hour
+        ),
     )
 
     dispatch_result = run_price_arbitrage_dispatch(
@@ -232,6 +234,10 @@ def dispatch(
     table.add_row(
         "Total delivered",
         f"{summary.get('total_energy_discharged_to_grid_kwh', 0):,.2f} kWh",
+    )
+    table.add_row(
+        "Cycle losses",
+        f"{summary.get('total_cycle_loss_kwh', 0):,.2f} kWh",
     )
     table.add_row(
         "Standby losses",

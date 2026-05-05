@@ -86,7 +86,8 @@ def validate_simulation_result(
     )
 
     standby_loss_before_clamp = (
-        scenario.losses.standby_loss_kwh_per_hour * result.standby_hours_per_cycle
+        scenario.losses.standby_loss_stored_kwh_per_hour
+        * result.standby_hours_per_cycle
     )
     _add_check(
         checks,
@@ -114,7 +115,7 @@ def validate_simulation_result(
     )
 
     expected_after_fraction = result.gross_delivered_energy_kwh * (
-        1 - scenario.losses.cycle_loss_fraction
+        1 - scenario.losses.additional_cycle_loss_fraction
     )
     expected_effective_delivery = max(
         expected_after_fraction - scenario.losses.fixed_cycle_loss_kwh,
@@ -216,7 +217,9 @@ def validate_dispatch_result(
         soc_final = float(row["soc_final_kwh"])
         charged = float(row["energy_charged_from_grid_kwh"])
         stored = float(row["energy_stored_kwh"])
+        gross_discharged = float(row.get("gross_energy_discharged_kwh", 0.0))
         discharged = float(row["energy_discharged_to_grid_kwh"])
+        cycle_loss = float(row.get("cycle_loss_kwh", 0.0))
         standby_loss = float(row["standby_loss_kwh"])
         price = float(row["price"])
 
@@ -239,7 +242,18 @@ def validate_dispatch_result(
         if row["action"] == "charge":
             expected_soc = min(soc_initial + stored, capacity_kwh)
         elif row["action"] == "discharge":
-            expected_soc = max(soc_initial - discharged / discharge_efficiency, 0.0)
+            expected_soc = max(
+                soc_initial - gross_discharged / discharge_efficiency,
+                0.0,
+            )
+            _add_check(
+                checks,
+                f"{prefix}_net_discharge_after_cycle_losses",
+                gross_discharged - cycle_loss,
+                discharged,
+                rel_tol,
+                abs_tol,
+            )
         else:
             expected_soc = max(soc_initial - standby_loss, 0.0)
 
@@ -280,7 +294,11 @@ def validate_dispatch_result(
     summary_columns = {
         "total_energy_charged_from_grid_kwh": "energy_charged_from_grid_kwh",
         "total_energy_stored_kwh": "energy_stored_kwh",
+        "total_gross_energy_discharged_kwh": "gross_energy_discharged_kwh",
         "total_energy_discharged_to_grid_kwh": "energy_discharged_to_grid_kwh",
+        "total_fractional_cycle_loss_kwh": "fractional_cycle_loss_kwh",
+        "total_fixed_cycle_loss_kwh": "fixed_cycle_loss_kwh",
+        "total_cycle_loss_kwh": "cycle_loss_kwh",
         "total_standby_loss_kwh": "standby_loss_kwh",
         "total_charge_cost": "charge_cost",
         "total_revenue": "revenue",

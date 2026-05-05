@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from sges.core.exceptions import InvalidParameterError
 from sges.physics.efficiency_model import EfficiencyChain, calculate_round_trip_efficiency
 from sges.physics.energy_model import PotentialEnergyInput, calculate_potential_energy
-from sges.physics.loss_model import LossModel
 from sges.technologies.base import GravityStorageTechnology, TechnologyResult
 
 
@@ -20,7 +19,6 @@ class TowerSGES(GravityStorageTechnology):
     mass_per_block_kg: float | None = None
     usable_height_fraction: float = 1.0
     structure_cost_per_meter: float = 0.0
-    loss_model: LossModel = LossModel()
 
     def simulate(self) -> TechnologyResult:
         charge_power_kw, discharge_power_kw = self._resolve_power_limits()

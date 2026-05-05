@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from api.main import app
 from api.schemas.scenario import SimulationRequest
 from sges.core.exceptions import InvalidParameterError
+from sges.io.config_loader import LossConfig
 from sges.simulation.scenario import (
     Scenario,
     TechnologyScenario,
@@ -27,9 +28,9 @@ def create_test_scenario():
             discharge_efficiency=0.9,
         ),
         losses=LossScenario(
-            cycle_loss_fraction=0.01,
+            additional_cycle_loss_fraction=0.01,
             fixed_cycle_loss_kwh=0.1,
-            standby_loss_kwh_per_hour=0.01,
+            standby_loss_stored_kwh_per_hour=0.01,
         ),
         economics=EconomicScenario(
             cost_per_kw=1000,
@@ -54,6 +55,45 @@ def test_simulator_runs():
     assert result.annual_opex > 0
     assert result.lcos_result is not None
     assert result.lcos_result.lcos_per_mwh > 0
+
+
+def test_legacy_loss_names_are_still_accepted():
+    request = SimulationRequest.model_validate(
+        {
+            "name": "legacy",
+            "technology_type": "tower",
+            "mass_kg": 100000,
+            "height_m": 50,
+            "nominal_power_kw": 100,
+            "charge_efficiency": 0.9,
+            "discharge_efficiency": 0.9,
+            "cycle_loss_fraction": 0.02,
+            "fixed_cycle_loss_kwh": 0.5,
+            "standby_loss_kwh_per_hour": 0.01,
+            "cost_per_kw": 1000,
+            "cost_per_kwh": 50,
+            "fixed_capex": 10000,
+            "fixed_annual_opex": 2000,
+            "variable_opex_per_mwh": 2,
+            "project_lifetime_years": 20,
+            "discount_rate": 0.08,
+            "cycles_per_year": 300,
+        }
+    )
+
+    assert request.additional_cycle_loss_fraction == pytest.approx(0.02)
+    assert request.standby_loss_stored_kwh_per_hour == pytest.approx(0.01)
+
+    config = LossConfig.model_validate(
+        {
+            "cycle_loss_fraction": 0.02,
+            "fixed_cycle_loss_kwh": 0.5,
+            "standby_loss_kwh_per_hour": 0.01,
+        }
+    )
+
+    assert config.additional_cycle_loss_fraction == pytest.approx(0.02)
+    assert config.standby_loss_stored_kwh_per_hour == pytest.approx(0.01)
 
 
 def test_simulator_energy_positive():
@@ -319,9 +359,9 @@ def test_cycle_loss_breakdown_separates_fractional_and_fixed_losses():
         scenario,
         losses=replace(
             scenario.losses,
-            cycle_loss_fraction=0.10,
+            additional_cycle_loss_fraction=0.10,
             fixed_cycle_loss_kwh=0.25,
-            standby_loss_kwh_per_hour=0.0,
+            standby_loss_stored_kwh_per_hour=0.0,
         ),
     )
 
@@ -342,7 +382,10 @@ def test_standby_loss_reduces_annual_energy_but_not_technical_energy():
     standby_scenario = create_test_scenario()
     zero_standby_scenario = replace(
         standby_scenario,
-        losses=replace(standby_scenario.losses, standby_loss_kwh_per_hour=0.0),
+        losses=replace(
+            standby_scenario.losses,
+            standby_loss_stored_kwh_per_hour=0.0,
+        ),
     )
 
     standby_result = simulator.run(standby_scenario)
@@ -443,7 +486,7 @@ def test_simulator_returns_result_when_losses_leave_no_deliverable_energy():
         losses=replace(
             scenario.losses,
             fixed_cycle_loss_kwh=100.0,
-            standby_loss_kwh_per_hour=100.0,
+            standby_loss_stored_kwh_per_hour=100.0,
         ),
     )
 
@@ -466,9 +509,9 @@ def test_simulation_route_returns_success_for_impossible_lcos():
         nominal_power_kw=scenario.technology.nominal_power_kw,
         charge_efficiency=scenario.technology.charge_efficiency,
         discharge_efficiency=scenario.technology.discharge_efficiency,
-        cycle_loss_fraction=scenario.losses.cycle_loss_fraction,
+        additional_cycle_loss_fraction=scenario.losses.additional_cycle_loss_fraction,
         fixed_cycle_loss_kwh=100.0,
-        standby_loss_kwh_per_hour=100.0,
+        standby_loss_stored_kwh_per_hour=100.0,
         cost_per_kw=scenario.economics.cost_per_kw,
         cost_per_kwh=scenario.economics.cost_per_kwh,
         fixed_capex=scenario.economics.fixed_capex,

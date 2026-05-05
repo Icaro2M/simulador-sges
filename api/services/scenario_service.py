@@ -30,9 +30,13 @@ class ScenarioService:
                 container_volume_m3=request.container_volume_m3,
             ),
             losses=LossScenario(
-                cycle_loss_fraction=request.cycle_loss_fraction,
+                additional_cycle_loss_fraction=(
+                    request.additional_cycle_loss_fraction
+                ),
                 fixed_cycle_loss_kwh=request.fixed_cycle_loss_kwh,
-                standby_loss_kwh_per_hour=request.standby_loss_kwh_per_hour,
+                standby_loss_stored_kwh_per_hour=(
+                    request.standby_loss_stored_kwh_per_hour
+                ),
             ),
             economics=EconomicScenario(
                 cost_per_kw=request.cost_per_kw,

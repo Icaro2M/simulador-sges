@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import AliasChoices, BaseModel, Field, model_validator
 
 
 class SimulationRequest(BaseModel):
@@ -24,9 +24,32 @@ class SimulationRequest(BaseModel):
     charge_efficiency: float = Field(gt=0, le=1)
     discharge_efficiency: float = Field(gt=0, le=1)
 
-    cycle_loss_fraction: float = Field(default=0.0, ge=0, lt=1)
+    additional_cycle_loss_fraction: float = Field(
+        default=0.0,
+        ge=0,
+        lt=1,
+        validation_alias=AliasChoices(
+            "additional_cycle_loss_fraction",
+            "cycle_loss_fraction",
+        ),
+    )
     fixed_cycle_loss_kwh: float = Field(default=0.0, ge=0)
-    standby_loss_kwh_per_hour: float = Field(default=0.0, ge=0)
+    standby_loss_stored_kwh_per_hour: float = Field(
+        default=0.0,
+        ge=0,
+        validation_alias=AliasChoices(
+            "standby_loss_stored_kwh_per_hour",
+            "standby_loss_kwh_per_hour",
+        ),
+    )
+
+    @property
+    def cycle_loss_fraction(self) -> float:
+        return self.additional_cycle_loss_fraction
+
+    @property
+    def standby_loss_kwh_per_hour(self) -> float:
+        return self.standby_loss_stored_kwh_per_hour
 
     cost_per_kw: float = Field(ge=0)
     cost_per_kwh: float = Field(ge=0)

@@ -76,7 +76,7 @@ def test_dispatch_tracks_soc_efficiency_losses_and_summary():
         config=DispatchConfig(
             low_price_threshold=20.0,
             high_price_threshold=80.0,
-            loss_model=LossModel(standby_loss_kwh_per_hour=5.0),
+            loss_model=LossModel(standby_loss_stored_kwh_per_hour=5.0),
         ),
     )
 
@@ -110,6 +110,41 @@ def test_dispatch_tracks_soc_efficiency_losses_and_summary():
     assert summary["charge_hours"] == 2
     assert summary["discharge_hours"] == 2
     assert summary["standby_hours"] == 2
+
+
+def test_dispatch_applies_additional_cycle_losses_on_discharge():
+    price_profile = pd.DataFrame(
+        [
+            {"hour": 0, "price": 100.0},
+        ]
+    )
+
+    result = run_price_arbitrage_dispatch(
+        simulation_result=make_simulation_result(),
+        price_profile=price_profile,
+        config=DispatchConfig(
+            low_price_threshold=20.0,
+            high_price_threshold=80.0,
+            initial_soc_kwh=100.0,
+            loss_model=LossModel(
+                additional_cycle_loss_fraction=0.10,
+                fixed_cycle_loss_kwh=5.0,
+            ),
+        ),
+    )
+
+    assert result.loc[0, "gross_energy_discharged_kwh"] == pytest.approx(50.0)
+    assert result.loc[0, "fractional_cycle_loss_kwh"] == pytest.approx(5.0)
+    assert result.loc[0, "fixed_cycle_loss_kwh"] == pytest.approx(5.0)
+    assert result.loc[0, "cycle_loss_kwh"] == pytest.approx(10.0)
+    assert result.loc[0, "energy_discharged_to_grid_kwh"] == pytest.approx(40.0)
+    assert result.loc[0, "soc_final_kwh"] == pytest.approx(100.0 - (50.0 / 0.9))
+
+    summary = result.attrs["summary"]
+
+    assert summary["total_gross_energy_discharged_kwh"] == pytest.approx(50.0)
+    assert summary["total_cycle_loss_kwh"] == pytest.approx(10.0)
+    assert summary["total_energy_discharged_to_grid_kwh"] == pytest.approx(40.0)
 
 
 def test_dispatch_clamps_initial_soc_to_physical_capacity():

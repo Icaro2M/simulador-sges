@@ -42,7 +42,11 @@ def run_price_arbitrage_dispatch(
         soc_initial_kwh = soc_kwh
         energy_charged_from_grid_kwh = 0.0
         energy_stored_kwh = 0.0
+        gross_energy_discharged_kwh = 0.0
         energy_discharged_to_grid_kwh = 0.0
+        fractional_cycle_loss_kwh = 0.0
+        fixed_cycle_loss_kwh = 0.0
+        cycle_loss_kwh = 0.0
         standby_loss_kwh = 0.0
         revenue = 0.0
         cost = 0.0
@@ -61,12 +65,19 @@ def run_price_arbitrage_dispatch(
 
         elif price >= config.high_price_threshold and soc_kwh > 0:
             action = "discharge"
-            energy_discharged_to_grid_kwh = min(
+            gross_energy_discharged_kwh = min(
                 discharge_power_kw * config.time_step_hours,
                 soc_kwh * discharge_efficiency,
             )
+            cycle_loss_breakdown = config.loss_model.calculate_cycle_loss_breakdown(
+                gross_energy_discharged_kwh
+            )
+            energy_discharged_to_grid_kwh = cycle_loss_breakdown.output_energy_kwh
+            fractional_cycle_loss_kwh = cycle_loss_breakdown.fractional_loss_kwh
+            fixed_cycle_loss_kwh = cycle_loss_breakdown.fixed_loss_kwh
+            cycle_loss_kwh = cycle_loss_breakdown.total_loss_kwh
             soc_kwh = max(
-                soc_kwh - (energy_discharged_to_grid_kwh / discharge_efficiency),
+                soc_kwh - (gross_energy_discharged_kwh / discharge_efficiency),
                 0.0,
             )
             revenue = (energy_discharged_to_grid_kwh / 1000) * price
@@ -91,9 +102,13 @@ def run_price_arbitrage_dispatch(
                 "soc_kwh": soc_kwh,
                 "energy_charged_from_grid_kwh": energy_charged_from_grid_kwh,
                 "energy_stored_kwh": energy_stored_kwh,
+                "gross_energy_discharged_kwh": gross_energy_discharged_kwh,
                 "energy_discharged_to_grid_kwh": energy_discharged_to_grid_kwh,
                 "charged_kwh": energy_charged_from_grid_kwh,
                 "discharged_kwh": energy_discharged_to_grid_kwh,
+                "fractional_cycle_loss_kwh": fractional_cycle_loss_kwh,
+                "fixed_cycle_loss_kwh": fixed_cycle_loss_kwh,
+                "cycle_loss_kwh": cycle_loss_kwh,
                 "standby_loss_kwh": standby_loss_kwh,
                 "charge_cost": cost,
                 "cost": cost,
@@ -115,9 +130,19 @@ def _build_dispatch_summary(dispatch_result: pd.DataFrame, final_soc_kwh: float)
             dispatch_result["energy_charged_from_grid_kwh"].sum()
         ),
         "total_energy_stored_kwh": float(dispatch_result["energy_stored_kwh"].sum()),
+        "total_gross_energy_discharged_kwh": float(
+            dispatch_result["gross_energy_discharged_kwh"].sum()
+        ),
         "total_energy_discharged_to_grid_kwh": float(
             dispatch_result["energy_discharged_to_grid_kwh"].sum()
         ),
+        "total_fractional_cycle_loss_kwh": float(
+            dispatch_result["fractional_cycle_loss_kwh"].sum()
+        ),
+        "total_fixed_cycle_loss_kwh": float(
+            dispatch_result["fixed_cycle_loss_kwh"].sum()
+        ),
+        "total_cycle_loss_kwh": float(dispatch_result["cycle_loss_kwh"].sum()),
         "total_standby_loss_kwh": float(dispatch_result["standby_loss_kwh"].sum()),
         "total_charge_cost": float(dispatch_result["charge_cost"].sum()),
         "total_revenue": float(dispatch_result["revenue"].sum()),

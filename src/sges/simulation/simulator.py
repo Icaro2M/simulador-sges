@@ -175,14 +175,17 @@ class SGESSimulator:
 
     def _build_loss_model(self, scenario: Scenario) -> LossModel:
         return LossModel(
-            cycle_loss_fraction=scenario.losses.cycle_loss_fraction,
+            additional_cycle_loss_fraction=(
+                scenario.losses.additional_cycle_loss_fraction
+            ),
             fixed_cycle_loss_kwh=scenario.losses.fixed_cycle_loss_kwh,
-            standby_loss_kwh_per_hour=scenario.losses.standby_loss_kwh_per_hour,
+            standby_loss_stored_kwh_per_hour=(
+                scenario.losses.standby_loss_stored_kwh_per_hour
+            ),
         )
 
     def _build_technology(self, scenario: Scenario):
         technology = scenario.technology
-        loss_model = self._build_loss_model(scenario)
 
         if technology.type == "tower":
             return TowerSGES(
@@ -197,7 +200,6 @@ class SGESSimulator:
                 mass_per_block_kg=technology.mass_per_block_kg,
                 usable_height_fraction=technology.usable_height_fraction,
                 structure_cost_per_meter=technology.structure_cost_per_meter,
-                loss_model=loss_model,
             )
 
         if technology.type == "shaft":
@@ -213,7 +215,6 @@ class SGESSimulator:
                 shaft_rehabilitation_cost=technology.shaft_rehabilitation_cost,
                 material_density_kg_m3=technology.material_density_kg_m3,
                 container_volume_m3=technology.container_volume_m3,
-                loss_model=loss_model,
             )
 
         raise InvalidParameterError(f"unsupported technology type: {technology.type}")

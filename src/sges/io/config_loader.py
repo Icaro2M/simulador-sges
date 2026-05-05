@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, Field, ValidationError, model_validator
+from pydantic import AliasChoices, BaseModel, Field, ValidationError, model_validator
 
 from sges.simulation.scenario import (
     EconomicScenario,
@@ -61,9 +61,24 @@ class TechnologyConfig(BaseModel):
 
 
 class LossConfig(BaseModel):
-    cycle_loss_fraction: float = Field(default=0.0, ge=0, lt=1)
+    additional_cycle_loss_fraction: float = Field(
+        default=0.0,
+        ge=0,
+        lt=1,
+        validation_alias=AliasChoices(
+            "additional_cycle_loss_fraction",
+            "cycle_loss_fraction",
+        ),
+    )
     fixed_cycle_loss_kwh: float = Field(default=0.0, ge=0)
-    standby_loss_kwh_per_hour: float = Field(default=0.0, ge=0)
+    standby_loss_stored_kwh_per_hour: float = Field(
+        default=0.0,
+        ge=0,
+        validation_alias=AliasChoices(
+            "standby_loss_stored_kwh_per_hour",
+            "standby_loss_kwh_per_hour",
+        ),
+    )
 
 
 class EconomicsConfig(BaseModel):
@@ -136,9 +151,13 @@ def load_scenario_from_yaml(path: str | Path) -> Scenario:
             container_volume_m3=config.technology.container_volume_m3,
         ),
         losses=LossScenario(
-            cycle_loss_fraction=config.losses.cycle_loss_fraction,
+            additional_cycle_loss_fraction=(
+                config.losses.additional_cycle_loss_fraction
+            ),
             fixed_cycle_loss_kwh=config.losses.fixed_cycle_loss_kwh,
-            standby_loss_kwh_per_hour=config.losses.standby_loss_kwh_per_hour,
+            standby_loss_stored_kwh_per_hour=(
+                config.losses.standby_loss_stored_kwh_per_hour
+            ),
         ),
         economics=EconomicScenario(
             cost_per_kw=config.economics.cost_per_kw,

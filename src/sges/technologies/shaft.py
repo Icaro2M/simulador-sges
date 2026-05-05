@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from sges.core.exceptions import InvalidParameterError
 from sges.physics.efficiency_model import EfficiencyChain, calculate_round_trip_efficiency
 from sges.physics.energy_model import PotentialEnergyInput, calculate_potential_energy
-from sges.physics.loss_model import LossModel
 from sges.technologies.base import GravityStorageTechnology, TechnologyResult
 
 
@@ -20,7 +19,6 @@ class ShaftSGES(GravityStorageTechnology):
     shaft_rehabilitation_cost: float = 0.0
     material_density_kg_m3: float | None = None
     container_volume_m3: float | None = None
-    loss_model: LossModel = LossModel()
 
     def simulate(self) -> TechnologyResult:
         charge_power_kw, discharge_power_kw = self._resolve_power_limits()

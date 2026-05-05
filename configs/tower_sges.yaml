@@ -11,9 +11,9 @@ technology:
   discharge_efficiency: 0.92
 
 losses:
-  cycle_loss_fraction: 0.02
+  additional_cycle_loss_fraction: 0.02
   fixed_cycle_loss_kwh: 0.5
-  standby_loss_kwh_per_hour: 0.01
+  standby_loss_stored_kwh_per_hour: 0.01
 
 economics:
   cost_per_kw: 1200

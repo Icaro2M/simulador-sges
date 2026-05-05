@@ -69,7 +69,7 @@ def build_standby_reference_scenario() -> Scenario:
             scenario.technology,
             nominal_power_kw=nominal_power_kw,
         ),
-        losses=LossScenario(standby_loss_kwh_per_hour=1.0),
+        losses=LossScenario(standby_loss_stored_kwh_per_hour=1.0),
         economics=replace(
             scenario.economics,
             cycles_per_year=800,

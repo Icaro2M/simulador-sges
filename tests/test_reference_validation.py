@@ -35,7 +35,10 @@ def test_round_trip_efficiency_is_charge_times_discharge():
 
 
 def test_cycle_losses_reduce_energy_and_never_go_negative():
-    loss_model = LossModel(cycle_loss_fraction=0.10, fixed_cycle_loss_kwh=5.0)
+    loss_model = LossModel(
+        additional_cycle_loss_fraction=0.10,
+        fixed_cycle_loss_kwh=5.0,
+    )
 
     assert loss_model.apply_cycle_losses(100.0) == pytest.approx(85.0)
     assert loss_model.apply_cycle_losses(2.0) == pytest.approx(0.0)
@@ -68,7 +71,7 @@ def test_reference_standby_scenario_uses_one_kwh_per_hour_for_ten_hours():
     scenario = build_standby_reference_scenario()
     zero_standby_scenario = replace(
         scenario,
-        losses=replace(scenario.losses, standby_loss_kwh_per_hour=0),
+        losses=replace(scenario.losses, standby_loss_stored_kwh_per_hour=0),
     )
 
     result = SGESSimulator().run(scenario)
@@ -133,7 +136,7 @@ def test_reference_dispatch_validates_soc_energy_cost_revenue_and_profit():
         config=DispatchConfig(
             low_price_threshold=20,
             high_price_threshold=80,
-            loss_model=LossModel(standby_loss_kwh_per_hour=1.0),
+            loss_model=LossModel(standby_loss_stored_kwh_per_hour=1.0),
         ),
     )
 
